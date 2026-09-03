@@ -225,12 +225,29 @@
 
 
       // Account information
-      const { data: account, error: accountError } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("customer_id", customer.id)
-          .single();
+     const { data: accounts, error: accountError } =
+  await supabaseClient
+    .from("accounts")
+    .select("*")
+    .eq("customer_id", customer.id)
+    .order("created_at", { ascending: false });
+
+if (accountError || !accounts || accounts.length === 0) {
+  document.getElementById("message").innerText =
+    "Account information not found.";
+  return;
+}
+
+const account = accounts[0];
+
+document.getElementById("accountNumber").innerText =
+  account.account_number;
+
+document.getElementById("accountType").innerText =
+  account.account_type;
+
+document.getElementById("balance").innerText =
+  "₹" + Number(account.balance).toFixed(2);
 
 
       if (accountError || !account) {
