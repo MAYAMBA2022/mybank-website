@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyBank Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h2 {
+      font-size: 24px;
+    }
+
+    .logout {
+      width: auto;
+      padding: 10px 18px;
+      background: white;
+      color: #2563eb;
+      border-radius: 7px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .welcome {
+      margin-bottom: 25px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
+
+    .card h4 {
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .transactions {
+      margin-top: 30px;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    .credit {
+      color: green;
+    }
+
+    .debit {
+      color: red;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 30px;
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h2>MyBank</h2>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="container">
+
+    <div class="welcome">
+      <h2>Welcome, <span id="customerName">Customer</span> 👋</h2>
+      <p>MyBank Account Dashboard</p>
+    </div>
+
+    <div class="cards">
+
+      <div class="card">
+        <h4>Account Number</h4>
+        <p id="accountNumber">Loading...</p>
+      </div>
+
+      <div class="card">
+        <h4>Account Type</h4>
+        <p id="accountType">Loading...</p>
+      </div>
+
+      <div class="card">
+        <h4>Balance</h4>
+        <p id="balance">₹0.00</p>
+      </div>
+
+    </div>
+
+    <div class="transactions">
+
+      <h2>Recent Transactions</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="transactionList">
+        </tbody>
+      </table>
+
+    </div>
+
+    <div id="message"></div>
+
+  </div>
+
+
+  <script>
+
+    // ==========================================
+    // SUPABASE SETTINGS
+    // ==========================================
+
+    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+
+    // ==========================================
+    // LOAD DASHBOARD
+    // ==========================================
+
+    async function loadDashboard() {
+
+      const {
+        data: { user }
+      } = await supabaseClient.auth.getUser();
+
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+
+      // Customer information
+      const { data: customer, error: customerError } =
+        await supabaseClient
+          .from("customers")
+          .select("*")
+          .eq("email", user.email)
+          .single();
+
+
+      if (customerError || !customer) {
+        document.getElementById("message").innerText =
+          "Customer information not found.";
+        return;
+      }
+
+
+      document.getElementById("customerName").innerText =
+        customer.full_name;
+
+
+      // Account information
+      const { data: account, error: accountError } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("customer_id", customer.id)
+          .single();
+
+
+      if (accountError || !account) {
+        document.getElementById("message").innerText =
+          "Account information not found.";
+        return;
+      }
+
+
+      document.getElementById("accountNumber").innerText =
+        account.account_number;
+
+      document.getElementById("accountType").innerText =
+        account.account_type;
+
+      document.getElementById("balance").innerText =
+        "₹" + Number(account.balance).toFixed(2);
+
+
+      // Transactions
+      const { data: transactions } =
+        await supabaseClient
+          .from("transactions")
+          .select("*")
+          .eq("account_id", account.id)
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+
+      const list =
+        document.getElementById("transactionList");
+
+      list.innerHTML = "";
+
+
+      if (!transactions || transactions.length === 0) {
+
+        list.innerHTML =
+          `<tr>
+            <td colspan="4">No transactions found</td>
+          </tr>`;
+
+        return;
+      }
+
+
+      transactions.forEach(function(transaction) {
+
+        const row = document.createElement("tr");
+
+        const typeClass =
+          transaction.transaction_type === "CREDIT"
+          ? "credit"
+          : "debit";
+
+
+        row.innerHTML = `
+          <td class="${typeClass}">
+            ${transaction.transaction_type}
+          </td>
+
+          <td>
+            ₹${Number(transaction.amount).toFixed(2)}
+          </td>
+
+          <td>
+            ${transaction.description || "-"}
+          </td>
+
+          <td>
+            ${transaction.status || "-"}
+          </td>
+        `;
+
+        list.appendChild(row);
+
+      });
+
+    }
+
+
+    // ==========================================
+    // LOGOUT
+    // ==========================================
+
+    document
+      .getElementById("logoutBtn")
+      .addEventListener("click", async function() {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href = "index.html";
+
+      });
+
+
+    loadDashboard();
+
+  </script>
+
+</body>
+</html>
