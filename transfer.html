@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyBank Transfer</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f1f5f9;
+    }
+
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+    }
+
+    h2 {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 18px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h2>MyBank</h2>
+  </div>
+
+  <div class="container">
+
+    <div class="box">
+
+      <h2>Transfer Money</h2>
+
+      <form id="transferForm">
+
+        <label>Receiver Account Number</label>
+
+        <input
+          type="text"
+          id="receiverAccount"
+          placeholder="Enter account number"
+          required
+        >
+
+        <label>Amount</label>
+
+        <input
+          type="number"
+          id="amount"
+          placeholder="Enter amount"
+          min="1"
+          required
+        >
+
+        <label>Description</label>
+
+        <input
+          type="text"
+          id="description"
+          placeholder="Transfer description"
+        >
+
+        <button type="submit">
+          Transfer
+        </button>
+
+      </form>
+
+      <div id="message"></div>
+
+      <a class="back" href="dashboard.html">
+        ← Back to Dashboard
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://ncihofyhnpxrftilejij.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+
+    document
+      .getElementById("transferForm")
+      .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const receiverAccount =
+          document.getElementById("receiverAccount").value.trim();
+
+        const amount =
+          Number(document.getElementById("amount").value);
+
+        const description =
+          document.getElementById("description").value.trim();
+
+        const message =
+          document.getElementById("message");
+
+
+        message.style.color = "blue";
+        message.innerText = "Processing transfer...";
+
+
+        const {
+          data: { user }
+        } = await supabaseClient.auth.getUser();
+
+
+        if (!user) {
+
+          window.location.href = "login.html";
+          return;
+
+        }
+
+
+        // Find sender customer
+        const { data: senderCustomer } =
+          await supabaseClient
+            .from("customers")
+            .select("id")
+            .eq("id", user.id)
+            .single();
+
+
+        if (!senderCustomer) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Customer information not found.";
+
+          return;
+        }
+
+
+        // Find sender account
+        const { data: senderAccount } =
+          await supabaseClient
+            .from("accounts")
+            .select("*")
+            .eq("customer_id", senderCustomer.id)
+            .single();
+
+
+        if (!senderAccount) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Sender account not found.";
+
+          return;
+        }
+
+
+        // Find receiver account
+        const { data: receiver } =
+          await supabaseClient
+            .from("accounts")
+            .select("*")
+            .eq("account_number", receiverAccount)
+            .single();
+
+
+        if (!receiver) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Receiver account not found.";
+
+          return;
+        }
+
+
+        if (receiver.id === senderAccount.id) {
+
+          message.style.color = "red";
+          message.innerText =
+            "You cannot transfer to your own account.";
+
+          return;
+        }
+
+
+        if (amount <= 0) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Enter a valid amount.";
+
+          return;
+        }
+
+
+        if (Number(senderAccount.balance) < amount) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Insufficient balance.";
+
+          return;
+        }
+
+
+        // Update sender balance
+        const { error: senderError } =
+          await supabaseClient
+            .from("accounts")
+            .update({
+              balance: Number(senderAccount.balance) - amount
+            })
+            .eq("id", senderAccount.id);
+
+
+        if (senderError) {
+
+          message.style.color = "red";
+          message.innerText =
+            senderError.message;
+
+          return;
+        }
+
+
+        // Update receiver balance
+        const { error: receiverError } =
+          await supabaseClient
+            .from("accounts")
+            .update({
+              balance: Number(receiver.balance) + amount
+            })
+            .eq("id", receiver.id);
+
+
+        if (receiverError) {
+
+          message.style.color = "red";
+          message.innerText =
+            receiverError.message;
+
+          return;
+        }
+
+
+        // Add debit transaction
+        await supabaseClient
+          .from("transactions")
+          .insert({
+            account_id: senderAccount.id,
+            transaction_type: "DEBIT",
+            amount: amount,
+            description: description || "Money Transfer",
+            status: "SUCCESS"
+          });
+
+
+        // Add credit transaction
+        await supabaseClient
+          .from("transactions")
+          .insert({
+            account_id: receiver.id,
+            transaction_type: "CREDIT",
+            amount: amount,
+            description: description || "Money Received",
+            status: "SUCCESS"
+          });
+
+
+        message.style.color = "green";
+        message.innerText =
+          "Transfer successful!";
+
+
+        document.getElementById("transferForm").reset();
+
+
+        setTimeout(function() {
+
+          window.location.href = "dashboard.html";
+
+        }, 1500);
+
+      });
+
+  </script>
+
+</body>
+</html>
