@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MyBank Login</title>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -118,6 +121,73 @@
     <div id="message"></div>
 
   </div>
+
+  <script>
+
+    // ==========================================
+    // SUPABASE SETTINGS
+    // ==========================================
+
+    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+
+    // ==========================================
+    // LOGIN
+    // ==========================================
+
+    document
+      .getElementById("loginForm")
+      .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+        const password =
+          document.getElementById("password").value;
+
+        const message =
+          document.getElementById("message");
+
+        message.style.color = "blue";
+        message.innerText = "Logging in...";
+
+
+        const { data, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+
+        if (error) {
+
+          message.style.color = "red";
+          message.innerText =
+            "Login failed: " + error.message;
+
+          return;
+        }
+
+
+        // Login successful
+        message.style.color = "green";
+        message.innerText = "Login successful!";
+
+
+        // Dashboard page
+        window.location.href = "dashboard.html";
+
+      });
+
+  </script>
 
 </body>
 </html>
