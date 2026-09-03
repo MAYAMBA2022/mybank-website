@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyBank Login</title>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>MyBank</title>
 
   <style>
     * {
@@ -24,170 +21,63 @@
       background: #f1f5f9;
     }
 
-    .login-box {
-      width: 360px;
+    .box {
+      width: 380px;
       background: white;
-      padding: 35px;
+      padding: 40px;
       border-radius: 15px;
+      text-align: center;
       box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
 
-    .logo {
-      text-align: center;
-      font-size: 30px;
-      font-weight: bold;
+    h1 {
+      color: #2563eb;
       margin-bottom: 10px;
     }
 
-    .subtitle {
-      text-align: center;
+    p {
       color: #64748b;
       margin-bottom: 30px;
     }
 
-    label {
+    a {
       display: block;
-      margin-bottom: 7px;
-      font-weight: bold;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px;
-      margin-bottom: 18px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
+      text-decoration: none;
       background: #2563eb;
       color: white;
-      font-size: 16px;
+      padding: 13px;
+      margin-top: 12px;
+      border-radius: 8px;
       font-weight: bold;
-      cursor: pointer;
     }
 
-    button:hover {
-      background: #1d4ed8;
+    a.register {
+      background: #16a34a;
     }
 
-    #message {
-      text-align: center;
-      margin-top: 15px;
-      color: red;
+    a:hover {
+      opacity: 0.9;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="login-box">
+  <div class="box">
 
-    <div class="logo">MyBank</div>
+    <h1>MyBank</h1>
 
-    <div class="subtitle">
-      Secure Banking Login
-    </div>
+    <p>Welcome to MyBank Online Banking</p>
 
-    <form id="loginForm">
+    <a href="login.html">
+      Login
+    </a>
 
-      <label>Email</label>
-      <input
-        type="email"
-        id="email"
-        placeholder="Enter your email"
-        required
-      >
-
-      <label>Password</label>
-      <input
-        type="password"
-        id="password"
-        placeholder="Enter your password"
-        required
-      >
-
-      <button type="submit">
-        Login
-      </button>
-
-    </form>
-
-    <div id="message"></div>
+    <a href="register.html" class="register">
+      Create New Account
+    </a>
 
   </div>
-
-  <script>
-
-    // ==========================================
-    // SUPABASE SETTINGS
-    // ==========================================
-
-    const SUPABASE_URL = "https://ncihofyhnpxrftilejij.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
-
-    const supabaseClient = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
-
-
-    // ==========================================
-    // LOGIN
-    // ==========================================
-
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        const email =
-          document.getElementById("email").value.trim();
-
-        const password =
-          document.getElementById("password").value;
-
-        const message =
-          document.getElementById("message");
-
-        message.style.color = "blue";
-        message.innerText = "Logging in...";
-
-
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-
-        if (error) {
-
-          message.style.color = "red";
-          message.innerText =
-            "Login failed: " + error.message;
-
-          return;
-        }
-
-
-        // Login successful
-        message.style.color = "green";
-        message.innerText = "Login successful!";
-
-
-        // Dashboard page
-        window.location.href = "dashboard.html";
-
-      });
-
-  </script>
 
 </body>
 </html>
