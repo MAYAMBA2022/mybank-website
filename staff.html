@@ -1,1992 +1,1228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MyBank Staff Panel</title>
+  <title>MyBank Staff Panel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-body{
-  background:#f1f5f9;
-  min-height:100vh;
-  color:#0f172a;
-}
+    body {
+      background: #f1f5f9;
+      min-height: 100vh;
+      color: #0f172a;
+    }
 
-.header{
-  background:#1d4ed8;
-  color:white;
-  padding:16px 25px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
 
-.header h2{
-  font-size:24px;
-}
+    .header h2 {
+      font-size: 24px;
+    }
 
-.logout{
-  background:white;
-  color:#1d4ed8;
-  border:0;
-  padding:10px 18px;
-  border-radius:7px;
-  font-weight:bold;
-  cursor:pointer;
-}
+    .logout {
+      padding: 10px 18px;
+      background: white;
+      color: #2563eb;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.layout{
-  display:flex;
-  min-height:calc(100vh - 64px);
-}
+    .container {
+      max-width: 1100px;
+      margin: 25px auto;
+      padding: 15px;
+    }
 
-.sidebar{
-  width:230px;
-  background:#0f172a;
-  padding:20px 10px;
-}
+    .welcome {
+      margin-bottom: 20px;
+    }
 
-.sidebar button{
-  width:100%;
-  padding:13px;
-  margin-bottom:8px;
-  background:transparent;
-  color:white;
-  border:0;
-  border-radius:7px;
-  text-align:left;
-  cursor:pointer;
-  font-size:15px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
 
-.sidebar button:hover,
-.sidebar button.active{
-  background:#2563eb;
-}
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
 
-.content{
-  flex:1;
-  padding:25px;
-  max-width:1200px;
-}
+    .card h3 {
+      margin-bottom: 15px;
+      color: #1e293b;
+    }
 
-.page{
-  display:none;
-}
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      font-size: 15px;
+    }
 
-.page.active{
-  display:block;
-}
+    button {
+      padding: 11px 17px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.title{
-  margin-bottom:20px;
-}
+    .blue {
+      background: #2563eb;
+      color: white;
+    }
 
-.title h2{
-  margin-bottom:5px;
-}
+    .green {
+      background: #16a34a;
+      color: white;
+    }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:18px;
-  margin-bottom:25px;
-}
+    .red {
+      background: #dc2626;
+      color: white;
+    }
 
-.stat{
-  background:white;
-  padding:22px;
-  border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,.07);
-}
+    .orange {
+      background: #ea580c;
+      color: white;
+    }
 
-.stat h4{
-  color:#64748b;
-  margin-bottom:10px;
-}
+    .message {
+      margin-top: 12px;
+      font-weight: bold;
+    }
 
-.stat p{
-  font-size:24px;
-  font-weight:bold;
-}
+    .account-result {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 8px;
+      display: none;
+    }
 
-.form-box{
-  background:white;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,.07);
-  margin-bottom:20px;
-}
+    .transactions {
+      margin-top: 25px;
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+      overflow-x: auto;
+    }
 
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      min-width: 650px;
+    }
 
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #cbd5e1;
-  border-radius:7px;
-  margin-top:6px;
-}
+    th,
+    td {
+      padding: 11px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
 
-label{
-  font-weight:bold;
-  font-size:14px;
-}
+    th {
+      background: #f8fafc;
+    }
 
-textarea{
-  resize:vertical;
-}
+    .credit {
+      color: green;
+      font-weight: bold;
+    }
 
-.btn{
-  background:#2563eb;
-  color:white;
-  border:0;
-  padding:12px 20px;
-  border-radius:7px;
-  cursor:pointer;
-  font-weight:bold;
-  margin-top:18px;
-}
+    .debit {
+      color: red;
+      font-weight: bold;
+    }
 
-.btn:hover{
-  background:#1d4ed8;
-}
+    @media(max-width:600px) {
+      .header {
+        padding: 15px;
+      }
 
-.btn.green{
-  background:#16a34a;
-}
-
-.btn.red{
-  background:#dc2626;
-}
-
-.table-box{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  overflow-x:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
-}
-
-th,td{
-  padding:12px;
-  border-bottom:1px solid #e2e8f0;
-  text-align:left;
-}
-
-th{
-  background:#f8fafc;
-}
-
-.message{
-  margin-top:15px;
-  padding:10px;
-  border-radius:6px;
-  display:none;
-}
-
-.success{
-  display:block;
-  background:#dcfce7;
-  color:#166534;
-}
-
-.error{
-  display:block;
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-@media(max-width:700px){
-
-  .sidebar{
-    width:180px;
-  }
-
-  .content{
-    padding:15px;
-  }
-
-  .header h2{
-    font-size:20px;
-  }
-}
-</style>
+      .container {
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">
+  <!-- HEADER -->
 
-  <h2>MyBank - Staff Banking System</h2>
+  <div class="header">
 
-  <button class="logout" onclick="logoutStaff()">
-    Logout
-  </button>
+    <h2>MyBank - Staff</h2>
 
-</div>
-
-
-<div class="layout">
-
-<!-- SIDEBAR -->
-
-<div class="sidebar">
-
-  <button class="active" onclick="showPage('dashboard',this)">
-    🏠 Dashboard
-  </button>
-
-  <button onclick="showPage('customers',this)">
-    👤 Customers
-  </button>
-
-  <button onclick="showPage('deposit',this)">
-    💰 Cash Deposit
-  </button>
-
-  <button onclick="showPage('withdraw',this)">
-    💸 Cash Withdrawal
-  </button>
-
-  <button onclick="showPage('transfer',this)">
-    🔄 Transfer
-  </button>
-
-  <button onclick="showPage('pigmy',this)">
-    🐷 Pigmy
-  </button>
-
-  <button onclick="showPage('loans',this)">
-    💳 Loans
-  </button>
-
-  <button onclick="showPage('reports',this)">
-    📊 Reports
-  </button>
-
-</div>
-
-
-<div class="content">
-
-
-<!-- ======================================
-     DASHBOARD
-====================================== -->
-
-<div id="dashboard" class="page active">
-
-  <div class="title">
-    <h2>Staff Dashboard</h2>
-    <p>MyBank Banking Operations</p>
-  </div>
-
-
-  <div class="stats">
-
-    <div class="stat">
-      <h4>Total Customers</h4>
-      <p id="totalCustomers">0</p>
-    </div>
-
-    <div class="stat">
-      <h4>Total Accounts</h4>
-      <p id="totalAccounts">0</p>
-    </div>
-
-    <div class="stat">
-      <h4>Total Pigmy Accounts</h4>
-      <p id="totalPigmy">0</p>
-    </div>
-
-    <div class="stat">
-      <h4>Total Loans</h4>
-      <p id="totalLoans">0</p>
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     CUSTOMERS
-====================================== -->
-
-<div id="customers" class="page">
-
-  <div class="title">
-    <h2>Customer Management</h2>
-    <p>Add new customer</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <div class="form-grid">
-
-      <div>
-        <label>Full Name</label>
-        <input id="customerName" placeholder="Customer name">
-      </div>
-
-      <div>
-        <label>Email</label>
-        <input id="customerEmail" type="email">
-      </div>
-
-      <div>
-        <label>Mobile</label>
-        <input id="customerMobile">
-      </div>
-
-      <div>
-        <label>Address</label>
-        <input id="customerAddress">
-      </div>
-
-    </div>
-
-    <button class="btn" onclick="addCustomer()">
-      Add Customer
-    </button>
-
-    <div id="customerMsg" class="message"></div>
-
-  </div>
-
-
-  <div class="table-box">
-
-    <h3>Customers</h3>
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Mobile</th>
-          <th>Address</th>
-        </tr>
-      </thead>
-
-      <tbody id="customerTable"></tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     DEPOSIT
-====================================== -->
-
-<div id="deposit" class="page">
-
-  <div class="title">
-    <h2>Cash Deposit</h2>
-    <p>Deposit money into customer account</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <div class="form-grid">
-
-      <div>
-        <label>Account Number</label>
-        <input id="depositAccount">
-      </div>
-
-      <div>
-        <label>Amount</label>
-        <input id="depositAmount" type="number">
-      </div>
-
-      <div>
-        <label>Description</label>
-        <input id="depositDescription"
-               value="Cash Deposit">
-      </div>
-
-    </div>
-
-    <button class="btn green" onclick="cashDeposit()">
-      Deposit Money
-    </button>
-
-    <div id="depositMsg" class="message"></div>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     WITHDRAW
-====================================== -->
-
-<div id="withdraw" class="page">
-
-  <div class="title">
-    <h2>Cash Withdrawal</h2>
-    <p>Withdraw money from customer account</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <div class="form-grid">
-
-      <div>
-        <label>Account Number</label>
-        <input id="withdrawAccount">
-      </div>
-
-      <div>
-        <label>Amount</label>
-        <input id="withdrawAmount" type="number">
-      </div>
-
-      <div>
-        <label>Description</label>
-        <input id="withdrawDescription"
-               value="Cash Withdrawal">
-      </div>
-
-    </div>
-
-    <button class="btn red" onclick="cashWithdraw()">
-      Withdraw Money
-    </button>
-
-    <div id="withdrawMsg" class="message"></div>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     TRANSFER
-====================================== -->
-
-<div id="transfer" class="page">
-
-  <div class="title">
-    <h2>Money Transfer</h2>
-    <p>Transfer money between accounts</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <div class="form-grid">
-
-      <div>
-        <label>From Account</label>
-        <input id="fromAccount">
-      </div>
-
-      <div>
-        <label>To Account</label>
-        <input id="toAccount">
-      </div>
-
-      <div>
-        <label>Amount</label>
-        <input id="transferAmount" type="number">
-      </div>
-
-      <div>
-        <label>Description</label>
-        <input id="transferDescription"
-               value="Account Transfer">
-      </div>
-
-    </div>
-
-    <button class="btn" onclick="transferMoney()">
-      Transfer Money
-    </button>
-
-    <div id="transferMsg" class="message"></div>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     PIGMY
-====================================== -->
-
-<div id="pigmy" class="page">
-
-  <div class="title">
-    <h2>Pigmy Banking</h2>
-    <p>Pigmy accounts and collections</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <h3>Pigmy Collection</h3>
-
-    <div class="form-grid">
-
-      <div>
-        <label>Pigmy Account ID</label>
-        <input id="pigmyAccount">
-      </div>
-
-      <div>
-        <label>Collection Amount</label>
-        <input id="pigmyAmount" type="number">
-      </div>
-
-      <div>
-        <label>Description</label>
-        <input id="pigmyDescription"
-               value="Pigmy Collection">
-      </div>
-
-    </div>
-
-    <button class="btn green" onclick="pigmyCollection()">
-      Save Collection
-    </button>
-
-    <div id="pigmyMsg" class="message"></div>
-
-  </div>
-
-
-  <div class="table-box">
-
-    <h3>Pigmy Agents</h3>
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Agent ID</th>
-          <th>Agent Name</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-
-      <tbody id="pigmyAgentTable"></tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     LOANS
-====================================== -->
-
-<div id="loans" class="page">
-
-  <div class="title">
-    <h2>Loan Management</h2>
-    <p>Loan application and repayment</p>
-  </div>
-
-
-  <div class="form-box">
-
-    <h3>Loan Application</h3>
-
-    <div class="form-grid">
-
-      <div>
-        <label>Customer ID</label>
-        <input id="loanCustomer">
-      </div>
-
-      <div>
-        <label>Loan Type ID</label>
-        <input id="loanType">
-      </div>
-
-      <div>
-        <label>Loan Amount</label>
-        <input id="loanAmount" type="number">
-      </div>
-
-      <div>
-        <label>Interest Rate (%)</label>
-        <input id="loanInterest" type="number">
-      </div>
-
-      <div>
-        <label>Tenure (Months)</label>
-        <input id="loanTenure" type="number">
-      </div>
-
-    </div>
-
-    <button class="btn" onclick="createLoan()">
-      Create Loan
-    </button>
-
-    <div id="loanMsg" class="message"></div>
-
-  </div>
-
-
-  <div class="table-box">
-
-    <h3>Loan Types</h3>
-
-    <table>
-
-      <thead>
-
-        <tr>
-          <th>ID</th>
-          <th>Loan Type</th>
-        </tr>
-
-      </thead>
-
-      <tbody id="loanTypeTable"></tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-
-<!-- ======================================
-     REPORTS
-====================================== -->
-
-<div id="reports" class="page">
-
-  <div class="title">
-
-    <h2>Reports</h2>
-
-    <p>Banking transaction reports</p>
-
-  </div>
-
-
-  <div class="form-box">
-
-    <button class="btn"
-            onclick="loadTransactionsReport()">
-
-      Load Transactions
-
+    <button
+      class="logout"
+      id="logoutBtn">
+      Logout
     </button>
 
   </div>
 
 
-  <div class="table-box">
+  <div class="container">
 
-    <table>
+    <!-- WELCOME -->
 
-      <thead>
+    <div class="welcome">
 
-        <tr>
-          <th>Account</th>
-          <th>Type</th>
-          <th>Amount</th>
-          <th>Description</th>
-          <th>Status</th>
-          <th>Date</th>
-        </tr>
+      <h2>
+        Staff Banking Panel 👨‍💼
+      </h2>
 
-      </thead>
+      <p>
+        Customer accounts, cash transactions and banking operations
+      </p>
 
-      <tbody id="reportTable"></tbody>
+    </div>
 
-    </table>
+
+    <!-- MAIN GRID -->
+
+    <div class="grid">
+
+
+      <!-- CUSTOMER SEARCH -->
+
+      <div class="card">
+
+        <h3>🔎 Customer / Account Search</h3>
+
+        <input
+          type="text"
+          id="searchAccount"
+          placeholder="Enter Account Number">
+
+        <button
+          class="blue"
+          onclick="searchAccount()">
+          Search Account
+        </button>
+
+        <div
+          id="accountResult"
+          class="account-result">
+        </div>
+
+      </div>
+
+
+      <!-- CASH DEPOSIT -->
+
+      <div class="card">
+
+        <h3>💰 Cash Deposit</h3>
+
+        <input
+          type="text"
+          id="depositAccount"
+          placeholder="Account Number">
+
+        <input
+          type="number"
+          id="depositAmount"
+          placeholder="Amount"
+          min="1">
+
+        <input
+          type="text"
+          id="depositDescription"
+          placeholder="Description"
+          value="Cash Deposit">
+
+        <button
+          class="green"
+          onclick="depositMoney()">
+          Deposit Money
+        </button>
+
+        <div
+          id="depositMessage"
+          class="message">
+        </div>
+
+      </div>
+
+
+      <!-- CASH WITHDRAWAL -->
+
+      <div class="card">
+
+        <h3>💵 Cash Withdrawal</h3>
+
+        <input
+          type="text"
+          id="withdrawAccount"
+          placeholder="Account Number">
+
+        <input
+          type="number"
+          id="withdrawAmount"
+          placeholder="Amount"
+          min="1">
+
+        <input
+          type="text"
+          id="withdrawDescription"
+          placeholder="Description"
+          value="Cash Withdrawal">
+
+        <button
+          class="red"
+          onclick="withdrawMoney()">
+          Withdraw Money
+        </button>
+
+        <div
+          id="withdrawMessage"
+          class="message">
+        </div>
+
+      </div>
+
+
+      <!-- ACCOUNT TYPE -->
+
+      <div class="card">
+
+        <h3>🏦 Account Type</h3>
+
+        <select id="accountTypeSelect">
+
+          <option value="SAVINGS">
+            Savings Account
+          </option>
+
+          <option value="CURRENT">
+            Current Account
+          </option>
+
+        </select>
+
+        <input
+          type="text"
+          id="newAccountCustomer"
+          placeholder="Customer ID">
+
+        <input
+          type="text"
+          id="newAccountNumber"
+          placeholder="Account Number">
+
+        <button
+          class="blue"
+          onclick="createAccount()">
+          Create Account
+        </button>
+
+        <div
+          id="accountCreateMessage"
+          class="message">
+        </div>
+
+      </div>
+
+
+      <!-- MONEY TRANSFER -->
+
+      <div class="card">
+
+        <h3>🔄 Money Transfer</h3>
+
+        <input
+          type="text"
+          id="transferFrom"
+          placeholder="From Account Number">
+
+        <input
+          type="text"
+          id="transferTo"
+          placeholder="To Account Number">
+
+        <input
+          type="number"
+          id="transferAmount"
+          placeholder="Amount"
+          min="1">
+
+        <input
+          type="text"
+          id="transferDescription"
+          placeholder="Description"
+          value="Account Transfer">
+
+        <button
+          class="orange"
+          onclick="transferMoney()">
+          Transfer
+        </button>
+
+        <div
+          id="transferMessage"
+          class="message">
+        </div>
+
+      </div>
+
+
+    </div>
+
+
+    <!-- TRANSACTIONS -->
+
+    <div class="transactions">
+
+      <h2>🧾 Recent Transactions</h2>
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Account</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Reference</th>
+            <th>Status</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="staffTransactionList">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
 
   </div>
 
-</div>
 
+  <script>
 
-</div>
-</div>
+    // ==========================================
+    // SUPABASE CONFIGURATION
+    // ==========================================
 
+    const SUPABASE_URL =
+      "https://ncihofyhnpxrftilejij.supabase.co";
 
-<script>
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
 
-/* ==========================================
-   SUPABASE CONFIGURATION
-========================================== */
-
-const SUPABASE_URL =
-"https://ncihofyhnpxrftilejij.supabase.co";
-
-const SUPABASE_ANON_KEY =
-"sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
-
-const supabaseClient =
-supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-
-/* ==========================================
-   PAGE NAVIGATION
-========================================== */
-
-function showPage(pageId, button){
-
-  document.querySelectorAll(".page")
-    .forEach(page => page.classList.remove("active"));
-
-  document.getElementById(pageId)
-    .classList.add("active");
-
-  document.querySelectorAll(".sidebar button")
-    .forEach(btn => btn.classList.remove("active"));
-
-  button.classList.add("active");
-
-}
-
-
-/* ==========================================
-   MESSAGE
-========================================== */
-
-function showMessage(id,text,type){
-
-  const box = document.getElementById(id);
-
-  box.innerText = text;
-
-  box.className = "message " + type;
-
-}
-
-
-/* ==========================================
-   DASHBOARD COUNTS
-========================================== */
-
-async function loadDashboard(){
-
-  const customers =
-    await supabaseClient
-      .from("customers")
-      .select("*",{count:"exact",head:true});
-
-  const accounts =
-    await supabaseClient
-      .from("accounts")
-      .select("*",{count:"exact",head:true});
-
-  const pigmy =
-    await supabaseClient
-      .from("pigmy_accounts")
-      .select("*",{count:"exact",head:true});
-
-  const loans =
-    await supabaseClient
-      .from("loans")
-      .select("*",{count:"exact",head:true});
-
-
-  document.getElementById("totalCustomers").innerText =
-    customers.count || 0;
-
-  document.getElementById("totalAccounts").innerText =
-    accounts.count || 0;
-
-  document.getElementById("totalPigmy").innerText =
-    pigmy.count || 0;
-
-  document.getElementById("totalLoans").innerText =
-    loans.count || 0;
-
-}
-
-
-/* ==========================================
-   ADD CUSTOMER
-========================================== */
-
-async function addCustomer(){
-
-  const fullName =
-    document.getElementById("customerName").value.trim();
-
-  const email =
-    document.getElementById("customerEmail").value.trim();
-
-  const mobile =
-    document.getElementById("customerMobile").value.trim();
-
-  const address =
-    document.getElementById("customerAddress").value.trim();
-
-
-  if(!fullName){
-
-    showMessage(
-      "customerMsg",
-      "Full Name required.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {error} =
-    await supabaseClient
-      .from("customers")
-      .insert({
-
-        full_name:fullName,
-        email:email,
-        mobile:mobile,
-        address:address
-
-      });
-
-
-  if(error){
-
-    console.error(error);
-
-    showMessage(
-      "customerMsg",
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "customerMsg",
-    "Customer added successfully.",
-    "success"
-  );
-
-
-  document.getElementById("customerName").value="";
-  document.getElementById("customerEmail").value="";
-  document.getElementById("customerMobile").value="";
-  document.getElementById("customerAddress").value="";
-
-
-  loadCustomers();
-  loadDashboard();
-
-}
-
-
-/* ==========================================
-   LOAD CUSTOMERS
-========================================== */
-
-async function loadCustomers(){
-
-  const {data,error} =
-    await supabaseClient
-      .from("customers")
-      .select("*")
-      .order("created_at",{ascending:false})
-      .limit(100);
-
-
-  const table =
-    document.getElementById("customerTable");
-
-  table.innerHTML="";
-
-
-  if(error){
-
-    table.innerHTML =
-      `<tr>
-        <td colspan="4">${error.message}</td>
-      </tr>`;
-
-    return;
-  }
-
-
-  data.forEach(customer => {
-
-    const row =
-      document.createElement("tr");
-
-    row.innerHTML = `
-
-      <td>${customer.full_name || "-"}</td>
-
-      <td>${customer.email || "-"}</td>
-
-      <td>${customer.mobile || "-"}</td>
-
-      <td>${customer.address || "-"}</td>
-
-    `;
-
-    table.appendChild(row);
-
-  });
-
-}
-
-
-/* ==========================================
-   CASH DEPOSIT
-========================================== */
-
-async function cashDeposit(){
-
-  const accountNumber =
-    document.getElementById("depositAccount")
-      .value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("depositAmount").value
-    );
-
-  const description =
-    document.getElementById("depositDescription").value;
-
-
-  if(!accountNumber || amount <= 0){
-
-    showMessage(
-      "depositMsg",
-      "Account number आणि valid amount द्या.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {data:account,error} =
-    await supabaseClient
-      .from("accounts")
-      .select("*")
-      .eq("account_number",accountNumber)
-      .single();
-
-
-  if(error || !account){
-
-    showMessage(
-      "depositMsg",
-      "Account not found.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const newBalance =
-    Number(account.balance || 0) + amount;
-
-
-  const {error:updateError} =
-    await supabaseClient
-      .from("accounts")
-      .update({
-        balance:newBalance
-      })
-      .eq("id",account.id);
-
-
-  if(updateError){
-
-    showMessage(
-      "depositMsg",
-      updateError.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {error:transactionError} =
-    await supabaseClient
-      .from("transactions")
-      .insert({
-
-        account_id:account.id,
-        customer_id:account.customer_id,
-        transaction_type:"CREDIT",
-        type:"DEPOSIT",
-        amount:amount,
-        description:description || "Cash Deposit",
-        status:"SUCCESS"
-
-      });
-
-
-  if(transactionError){
-
-    console.error(transactionError);
-
-    showMessage(
-      "depositMsg",
-      "Balance updated पण transaction save झाला नाही.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "depositMsg",
-    "₹" + amount.toFixed(2) + " Deposit successful.",
-    "success"
-  );
-
-
-  document.getElementById("depositAmount").value="";
-
-}
-
-
-/* ==========================================
-   CASH WITHDRAWAL
-========================================== */
-
-async function cashWithdraw(){
-
-  const accountNumber =
-    document.getElementById("withdrawAccount")
-      .value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("withdrawAmount").value
-    );
-
-  const description =
-    document.getElementById("withdrawDescription").value;
-
-
-  if(!accountNumber || amount <= 0){
-
-    showMessage(
-      "withdrawMsg",
-      "Account number आणि valid amount द्या.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {data:account,error} =
-    await supabaseClient
-      .from("accounts")
-      .select("*")
-      .eq("account_number",accountNumber)
-      .single();
-
-
-  if(error || !account){
-
-    showMessage(
-      "withdrawMsg",
-      "Account not found.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(Number(account.balance || 0) < amount){
-
-    showMessage(
-      "withdrawMsg",
-      "Insufficient balance.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const newBalance =
-    Number(account.balance) - amount;
-
-
-  const {error:updateError} =
-    await supabaseClient
-      .from("accounts")
-      .update({
-        balance:newBalance
-      })
-      .eq("id",account.id);
-
-
-  if(updateError){
-
-    showMessage(
-      "withdrawMsg",
-      updateError.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {error:transactionError} =
-    await supabaseClient
-      .from("transactions")
-      .insert({
-
-        account_id:account.id,
-        customer_id:account.customer_id,
-        transaction_type:"DEBIT",
-        type:"WITHDRAWAL",
-        amount:amount,
-        description:
-          description || "Cash Withdrawal",
-        status:"SUCCESS"
-
-      });
-
-
-  if(transactionError){
-
-    showMessage(
-      "withdrawMsg",
-      "Balance updated पण transaction save झाला नाही.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "withdrawMsg",
-    "₹" + amount.toFixed(2) +
-    " Withdrawal successful.",
-    "success"
-  );
-
-
-  document.getElementById("withdrawAmount").value="";
-
-}
-
-
-/* ==========================================
-   TRANSFER
-========================================== */
-
-async function transferMoney(){
-
-  const fromAccount =
-    document.getElementById("fromAccount")
-      .value.trim();
-
-  const toAccount =
-    document.getElementById("toAccount")
-      .value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("transferAmount").value
-    );
-
-  const description =
-    document.getElementById("transferDescription").value;
-
-
-  if(!fromAccount || !toAccount || amount <= 0){
-
-    showMessage(
-      "transferMsg",
-      "सर्व माहिती योग्य भरा.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(fromAccount === toAccount){
-
-    showMessage(
-      "transferMsg",
-      "From आणि To account same असू शकत नाही.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {data:sender,error:senderError} =
-    await supabaseClient
-      .from("accounts")
-      .select("*")
-      .eq("account_number",fromAccount)
-      .single();
-
-
-  if(senderError || !sender){
-
-    showMessage(
-      "transferMsg",
-      "Sender account not found.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(Number(sender.balance) < amount){
-
-    showMessage(
-      "transferMsg",
-      "Insufficient balance.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {data:receiver,error:receiverError} =
-    await supabaseClient
-      .from("accounts")
-      .select("*")
-      .eq("account_number",toAccount)
-      .single();
-
-
-  if(receiverError || !receiver){
-
-    showMessage(
-      "transferMsg",
-      "Receiver account not found.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  await supabaseClient
-    .from("accounts")
-    .update({
-      balance:Number(sender.balance)-amount
-    })
-    .eq("id",sender.id);
-
-
-  await supabaseClient
-    .from("accounts")
-    .update({
-      balance:Number(receiver.balance)+amount
-    })
-    .eq("id",receiver.id);
-
-
-  await supabaseClient
-    .from("transactions")
-    .insert({
-
-      account_id:sender.id,
-      customer_id:sender.customer_id,
-      transaction_type:"DEBIT",
-      type:"TRANSFER",
-      amount:amount,
-      description:
-        description || "Account Transfer",
-      status:"SUCCESS"
-
-    });
-
-
-  await supabaseClient
-    .from("transactions")
-    .insert({
-
-      account_id:receiver.id,
-      customer_id:receiver.customer_id,
-      transaction_type:"CREDIT",
-      type:"TRANSFER",
-      amount:amount,
-      description:
-        description || "Account Transfer",
-      status:"SUCCESS"
-
-    });
-
-
-  showMessage(
-    "transferMsg",
-    "Transfer successful.",
-    "success"
-  );
-
-
-  document.getElementById("transferAmount").value="";
-
-}
-
-
-/* ==========================================
-   PIGMY COLLECTION
-========================================== */
-
-async function pigmyCollection(){
-
-  const pigmyId =
-    document.getElementById("pigmyAccount")
-      .value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("pigmyAmount").value
-    );
-
-  const description =
-    document.getElementById("pigmyDescription").value;
-
-
-  if(!pigmyId || amount <= 0){
-
-    showMessage(
-      "pigmyMsg",
-      "Pigmy Account ID आणि amount द्या.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const {data:pigmy,error} =
-    await supabaseClient
-      .from("pigmy_accounts")
-      .select("*")
-      .eq("id",pigmyId)
-      .single();
-
-
-  if(error || !pigmy){
-
-    showMessage(
-      "pigmyMsg",
-      "Pigmy account not found.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /*
-     तुमच्या pigmy_collections table मध्ये
-     exact column names schema नुसार बदलावे लागू शकतात.
-  */
-
-  const {error:collectionError} =
-    await supabaseClient
-      .from("pigmy_collections")
-      .insert({
-
-        pigmy_account_id:pigmy.id,
-        amount:amount,
-        description:
-          description || "Pigmy Collection"
-
-      });
-
-
-  if(collectionError){
-
-    showMessage(
-      "pigmyMsg",
-      collectionError.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "pigmyMsg",
-    "Pigmy collection saved successfully.",
-    "success"
-  );
-
-
-  document.getElementById("pigmyAmount").value="";
-
-}
-
-
-/* ==========================================
-   PIGMY AGENTS
-========================================== */
-
-async function loadPigmyAgents(){
-
-  const {data,error} =
-    await supabaseClient
-      .from("pigmy_agents")
-      .select("*")
-      .limit(100);
-
-
-  const table =
-    document.getElementById("pigmyAgentTable");
-
-  table.innerHTML="";
-
-
-  if(error){
-
-    table.innerHTML =
-      `<tr>
-        <td colspan="3">${error.message}</td>
-      </tr>`;
-
-    return;
-  }
-
-
-  data.forEach(agent => {
-
-    const row =
-      document.createElement("tr");
-
-    row.innerHTML=`
-
-      <td>${agent.id || "-"}</td>
-
-      <td>
-        ${agent.full_name ||
-          agent.name ||
-          "-"}
-      </td>
-
-      <td>
-        ${agent.status || "ACTIVE"}
-      </td>
-
-    `;
-
-    table.appendChild(row);
-
-  });
-
-}
-
-
-/* ==========================================
-   LOAN
-========================================== */
-
-async function createLoan(){
-
-  const customerId =
-    document.getElementById("loanCustomer").value.trim();
-
-  const loanType =
-    document.getElementById("loanType").value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("loanAmount").value
-    );
-
-  const interest =
-    Number(
-      document.getElementById("loanInterest").value
-    );
-
-  const tenure =
-    Number(
-      document.getElementById("loanTenure").value
-    );
-
-
-  if(!customerId ||
-     !loanType ||
-     amount <= 0){
-
-    showMessage(
-      "loanMsg",
-      "Customer, Loan Type आणि Amount भरा.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /*
-    loans table च्या actual schema नुसार
-    खालील columns बदलावे लागू शकतात.
-  */
-
-  const {error} =
-    await supabaseClient
-      .from("loans")
-      .insert({
-
-        customer_id:customerId,
-        loan_type_id:loanType,
-        loan_amount:amount,
-        interest_rate:interest,
-        tenure_months:tenure,
-        status:"PENDING"
-
-      });
-
-
-  if(error){
-
-    console.error(error);
-
-    showMessage(
-      "loanMsg",
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "loanMsg",
-    "Loan application created.",
-    "success"
-  );
-
-
-  document.getElementById("loanAmount").value="";
-
-}
-
-
-/* ==========================================
-   LOAN TYPES
-========================================== */
-
-async function loadLoanTypes(){
-
-  const {data,error} =
-    await supabaseClient
-      .from("loan_types")
-      .select("*")
-      .limit(100);
-
-
-  const table =
-    document.getElementById("loanTypeTable");
-
-  table.innerHTML="";
-
-
-  if(error){
-
-    table.innerHTML =
-      `<tr>
-        <td colspan="2">${error.message}</td>
-      </tr>`;
-
-    return;
-  }
-
-
-  data.forEach(type => {
-
-    const row =
-      document.createElement("tr");
-
-    row.innerHTML=`
-
-      <td>${type.id || "-"}</td>
-
-      <td>
-        ${type.name ||
-          type.loan_type ||
-          type.type_name ||
-          "-"}
-      </td>
-
-    `;
-
-    table.appendChild(row);
-
-  });
-
-}
-
-
-/* ==========================================
-   TRANSACTION REPORT
-========================================== */
-
-async function loadTransactionsReport(){
-
-  const {data,error} =
-    await supabaseClient
-      .from("transactions")
-      .select("*")
-      .order("created_at",{ascending:false})
-      .limit(100);
-
-
-  const table =
-    document.getElementById("reportTable");
-
-  table.innerHTML="";
-
-
-  if(error){
-
-    table.innerHTML =
-      `<tr>
-        <td colspan="6">${error.message}</td>
-      </tr>`;
-
-    return;
-  }
-
-
-  data.forEach(transaction => {
-
-    const row =
-      document.createElement("tr");
-
-    row.innerHTML=`
-
-      <td>
-        ${transaction.account_id || "-"}
-      </td>
-
-      <td>
-        ${transaction.transaction_type ||
-          transaction.type ||
-          "-"}
-      </td>
-
-      <td>
-        ₹${Number(transaction.amount || 0).toFixed(2)}
-      </td>
-
-      <td>
-        ${transaction.description || "-"}
-      </td>
-
-      <td>
-        ${transaction.status || "-"}
-      </td>
-
-      <td>
-        ${transaction.created_at
-          ? new Date(transaction.created_at)
-              .toLocaleString()
-          : "-"}
-      </td>
-
-    `;
-
-    table.appendChild(row);
-
-  });
-
-}
-
-
-/* ==========================================
-   LOGOUT
-========================================== */
-
-async function logoutStaff(){
-
-  await supabaseClient.auth.signOut();
-
-  window.location.href="index.html";
-
-}
-
-
-/* ==========================================
-   START
-========================================== */
-
-loadDashboard();
-loadCustomers();
-loadPigmyAgents();
-loadLoanTypes();
-
-  // ==========================================
-// DEPOSIT MONEY
-// ==========================================
-
-async function depositMoney() {
-
-  try {
-
-    const accountNumber =
-      document.getElementById("depositAccount").value.trim();
-
-    const amount =
-      Number(document.getElementById("depositAmount").value);
-
-    const description =
-      document.getElementById("depositDescription").value.trim()
-      || "Cash Deposit";
-
-    if (!accountNumber) {
-      alert("Please enter account number.");
-      return;
-    }
-
-    if (!amount || amount <= 0) {
-      alert("Please enter valid amount.");
-      return;
-    }
-
-    // Find account
-    const { data: account, error: accountError } =
-      await supabaseClient
-        .from("accounts")
-        .select("*")
-        .eq("account_number", accountNumber)
-        .single();
-
-    if (accountError || !account) {
-      alert("Account not found.");
-      return;
-    }
-
-    // Calculate new balance
-    const newBalance =
-      Number(account.balance || 0) + amount;
-
-    // Update balance
-    const { error: updateError } =
-      await supabaseClient
-        .from("accounts")
-        .update({
-          balance: newBalance
-        })
-        .eq("id", account.id);
-
-    if (updateError) {
-      console.error(updateError);
-      alert("Balance update failed.");
-      return;
-    }
-
-    // Save transaction
-    const { error: transactionError } =
-      await supabaseClient
-        .from("transactions")
-        .insert({
-          account_id: account.id,
-          transaction_type: "CREDIT",
-          amount: amount,
-          description: description,
-          status: "SUCCESS"
-        });
-
-    if (transactionError) {
-      console.error(transactionError);
-      alert("Transaction save failed.");
-      return;
-    }
-
-    alert(
-      "Deposit Successful!\n\n" +
-      "Account: " + accountNumber +
-      "\nAmount: ₹" + amount.toFixed(2) +
-      "\nNew Balance: ₹" + newBalance.toFixed(2)
-    );
-
-    document.getElementById("depositAccount").value = "";
-    document.getElementById("depositAmount").value = "";
-    document.getElementById("depositDescription").value = "";
-
-    if (typeof loadDashboard === "function") {
-      loadDashboard();
-    }
-
-  } catch (error) {
-
-    console.error("Deposit Error:", error);
-    alert("Deposit failed.");
-  }
-}
-
-
-// ==========================================
-// WITHDRAW MONEY
-// ==========================================
-
-async function withdrawMoney() {
-
-  try {
-
-    const accountNumber =
-      document.getElementById("withdrawAccount").value.trim();
-
-    const amount =
-      Number(document.getElementById("withdrawAmount").value);
-
-    const description =
-      document.getElementById("withdrawDescription").value.trim()
-      || "Cash Withdrawal";
-
-    if (!accountNumber) {
-      alert("Please enter account number.");
-      return;
-    }
-
-    if (!amount || amount <= 0) {
-      alert("Please enter valid amount.");
-      return;
-    }
-
-    // Find account
-    const { data: account, error: accountError } =
-      await supabaseClient
-        .from("accounts")
-        .select("*")
-        .eq("account_number", accountNumber)
-        .single();
-
-    if (accountError || !account) {
-      alert("Account not found.");
-      return;
-    }
-
-    const currentBalance =
-      Number(account.balance || 0);
-
-    // Check balance
-    if (currentBalance < amount) {
-      alert(
-        "Insufficient Balance!\n\n" +
-        "Available Balance: ₹" +
-        currentBalance.toFixed(2)
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
       );
-      return;
+
+
+    // ==========================================
+    // SEARCH ACCOUNT
+    // ==========================================
+
+    async function searchAccount() {
+
+      const accountNumber =
+        document
+          .getElementById("searchAccount")
+          .value
+          .trim();
+
+      const result =
+        document.getElementById("accountResult");
+
+      result.style.display = "block";
+
+      if (!accountNumber) {
+
+        result.innerHTML =
+          "Please enter account number.";
+
+        return;
+      }
+
+      const { data: account, error } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("account_number", accountNumber)
+          .single();
+
+      if (error || !account) {
+
+        result.innerHTML =
+          "❌ Account not found.";
+
+        return;
+      }
+
+      result.innerHTML = `
+        <strong>Account Number:</strong>
+        ${account.account_number}
+        <br><br>
+
+        <strong>Account Type:</strong>
+        ${account.account_type}
+        <br><br>
+
+        <strong>Balance:</strong>
+        ₹${Number(account.balance || 0).toFixed(2)}
+      `;
+
     }
 
-    // Calculate new balance
-    const newBalance =
-      currentBalance - amount;
 
-    // Update balance
-    const { error: updateError } =
-      await supabaseClient
-        .from("accounts")
-        .update({
-          balance: newBalance
-        })
-        .eq("id", account.id);
+    // ==========================================
+    // DEPOSIT MONEY
+    // ==========================================
 
-    if (updateError) {
-      console.error(updateError);
-      alert("Balance update failed.");
-      return;
+    async function depositMoney() {
+
+      const accountNumber =
+        document
+          .getElementById("depositAccount")
+          .value
+          .trim();
+
+      const amount =
+        Number(
+          document.getElementById("depositAmount").value
+        );
+
+      const description =
+        document
+          .getElementById("depositDescription")
+          .value
+          .trim() || "Cash Deposit";
+
+      const message =
+        document.getElementById("depositMessage");
+
+      message.innerText = "";
+
+      if (!accountNumber) {
+
+        message.innerText =
+          "Please enter account number.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+
+        message.innerText =
+          "Please enter valid amount.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { data: account, error: accountError } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("account_number", accountNumber)
+          .single();
+
+      if (accountError || !account) {
+
+        message.innerText =
+          "Account not found.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const newBalance =
+        Number(account.balance || 0) + amount;
+
+      const { error: updateError } =
+        await supabaseClient
+          .from("accounts")
+          .update({
+            balance: newBalance
+          })
+          .eq("id", account.id);
+
+      if (updateError) {
+
+        console.error(updateError);
+
+        message.innerText =
+          "Balance update failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { error: transactionError } =
+        await supabaseClient
+          .from("transactions")
+          .insert({
+
+            account_id: account.id,
+
+            transaction_type: "CREDIT",
+
+            amount: amount,
+
+            description: description,
+
+            reference_number:
+              "DEP-" + Date.now(),
+
+            status: "SUCCESS"
+
+          });
+
+      if (transactionError) {
+
+        console.error(transactionError);
+
+        message.innerText =
+          "Transaction save failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      message.innerText =
+        "✅ Deposit Successful | New Balance: ₹" +
+        newBalance.toFixed(2);
+
+      message.style.color = "green";
+
+      document.getElementById(
+        "depositAmount"
+      ).value = "";
+
+      loadStaffTransactions();
+
     }
 
-    // Save transaction
-    const { error: transactionError } =
+
+    // ==========================================
+    // WITHDRAW MONEY
+    // ==========================================
+
+    async function withdrawMoney() {
+
+      const accountNumber =
+        document
+          .getElementById("withdrawAccount")
+          .value
+          .trim();
+
+      const amount =
+        Number(
+          document.getElementById("withdrawAmount").value
+        );
+
+      const description =
+        document
+          .getElementById("withdrawDescription")
+          .value
+          .trim() || "Cash Withdrawal";
+
+      const message =
+        document.getElementById("withdrawMessage");
+
+      message.innerText = "";
+
+      if (!accountNumber) {
+
+        message.innerText =
+          "Please enter account number.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+
+        message.innerText =
+          "Please enter valid amount.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { data: account, error: accountError } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("account_number", accountNumber)
+          .single();
+
+      if (accountError || !account) {
+
+        message.innerText =
+          "Account not found.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const currentBalance =
+        Number(account.balance || 0);
+
+      if (currentBalance < amount) {
+
+        message.innerText =
+          "❌ Insufficient Balance. Available: ₹" +
+          currentBalance.toFixed(2);
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const newBalance =
+        currentBalance - amount;
+
+      const { error: updateError } =
+        await supabaseClient
+          .from("accounts")
+          .update({
+            balance: newBalance
+          })
+          .eq("id", account.id);
+
+      if (updateError) {
+
+        console.error(updateError);
+
+        message.innerText =
+          "Balance update failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { error: transactionError } =
+        await supabaseClient
+          .from("transactions")
+          .insert({
+
+            account_id: account.id,
+
+            transaction_type: "DEBIT",
+
+            amount: amount,
+
+            description: description,
+
+            reference_number:
+              "WDL-" + Date.now(),
+
+            status: "SUCCESS"
+
+          });
+
+      if (transactionError) {
+
+        console.error(transactionError);
+
+        message.innerText =
+          "Transaction save failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      message.innerText =
+        "✅ Withdrawal Successful | Remaining Balance: ₹" +
+        newBalance.toFixed(2);
+
+      message.style.color = "green";
+
+      document.getElementById(
+        "withdrawAmount"
+      ).value = "";
+
+      loadStaffTransactions();
+
+    }
+
+
+    // ==========================================
+    // CREATE ACCOUNT
+    // ==========================================
+
+    async function createAccount() {
+
+      const customerId =
+        document
+          .getElementById("newAccountCustomer")
+          .value
+          .trim();
+
+      const accountNumber =
+        document
+          .getElementById("newAccountNumber")
+          .value
+          .trim();
+
+      const accountType =
+        document
+          .getElementById("accountTypeSelect")
+          .value;
+
+      const message =
+        document.getElementById(
+          "accountCreateMessage"
+        );
+
+      if (!customerId || !accountNumber) {
+
+        message.innerText =
+          "Customer ID and Account Number are required.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { data, error } =
+        await supabaseClient
+          .from("accounts")
+          .insert({
+
+            customer_id: customerId,
+
+            account_number: accountNumber,
+
+            account_type: accountType,
+
+            balance: 0
+
+          })
+          .select()
+          .single();
+
+      if (error) {
+
+        console.error(error);
+
+        message.innerText =
+          "Account creation failed: " +
+          error.message;
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      message.innerText =
+        "✅ Account created successfully.";
+
+      message.style.color = "green";
+
+      console.log("New Account:", data);
+
+    }
+
+
+    // ==========================================
+    // TRANSFER MONEY
+    // ==========================================
+
+    async function transferMoney() {
+
+      const fromAccount =
+        document
+          .getElementById("transferFrom")
+          .value
+          .trim();
+
+      const toAccount =
+        document
+          .getElementById("transferTo")
+          .value
+          .trim();
+
+      const amount =
+        Number(
+          document.getElementById("transferAmount").value
+        );
+
+      const description =
+        document
+          .getElementById("transferDescription")
+          .value
+          .trim() || "Account Transfer";
+
+      const message =
+        document.getElementById(
+          "transferMessage"
+        );
+
+      message.innerText = "";
+
+      if (!fromAccount || !toAccount) {
+
+        message.innerText =
+          "Both account numbers are required.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      if (fromAccount === toAccount) {
+
+        message.innerText =
+          "Sender and receiver cannot be same.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+
+        message.innerText =
+          "Please enter valid amount.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { data: sender, error: senderError } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("account_number", fromAccount)
+          .single();
+
+      if (senderError || !sender) {
+
+        message.innerText =
+          "Sender account not found.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const senderBalance =
+        Number(sender.balance || 0);
+
+      if (senderBalance < amount) {
+
+        message.innerText =
+          "Insufficient sender balance.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const { data: receiver, error: receiverError } =
+        await supabaseClient
+          .from("accounts")
+          .select("*")
+          .eq("account_number", toAccount)
+          .single();
+
+      if (receiverError || !receiver) {
+
+        message.innerText =
+          "Receiver account not found.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+      const newSenderBalance =
+        senderBalance - amount;
+
+      const newReceiverBalance =
+        Number(receiver.balance || 0) + amount;
+
+
+      const { error: senderUpdateError } =
+        await supabaseClient
+          .from("accounts")
+          .update({
+            balance: newSenderBalance
+          })
+          .eq("id", sender.id);
+
+      if (senderUpdateError) {
+
+        console.error(senderUpdateError);
+
+        message.innerText =
+          "Sender balance update failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+
+      const { error: receiverUpdateError } =
+        await supabaseClient
+          .from("accounts")
+          .update({
+            balance: newReceiverBalance
+          })
+          .eq("id", receiver.id);
+
+      if (receiverUpdateError) {
+
+        console.error(receiverUpdateError);
+
+        message.innerText =
+          "Receiver balance update failed.";
+
+        message.style.color = "red";
+
+        return;
+      }
+
+
+      // Sender transaction
+
       await supabaseClient
         .from("transactions")
         .insert({
-          account_id: account.id,
+
+          account_id: sender.id,
+
           transaction_type: "DEBIT",
+
           amount: amount,
+
           description: description,
+
+          reference_number:
+            "TRF-" + Date.now(),
+
           status: "SUCCESS"
+
         });
 
-    if (transactionError) {
-      console.error(transactionError);
-      alert("Transaction save failed.");
-      return;
+
+      // Receiver transaction
+
+      await supabaseClient
+        .from("transactions")
+        .insert({
+
+          account_id: receiver.id,
+
+          transaction_type: "CREDIT",
+
+          amount: amount,
+
+          description: description,
+
+          reference_number:
+            "TRF-" + Date.now(),
+
+          status: "SUCCESS"
+
+        });
+
+
+      message.innerText =
+        "✅ Transfer Successful.";
+
+      message.style.color = "green";
+
+      document.getElementById(
+        "transferAmount"
+      ).value = "";
+
+      loadStaffTransactions();
+
     }
 
-    alert(
-      "Withdrawal Successful!\n\n" +
-      "Account: " + accountNumber +
-      "\nAmount: ₹" + amount.toFixed(2) +
-      "\nRemaining Balance: ₹" +
-      newBalance.toFixed(2)
-    );
 
-    document.getElementById("withdrawAccount").value = "";
-    document.getElementById("withdrawAmount").value = "";
-    document.getElementById("withdrawDescription").value = "";
+    // ==========================================
+    // LOAD TRANSACTIONS
+    // ==========================================
 
-    if (typeof loadDashboard === "function") {
-      loadDashboard();
+    async function loadStaffTransactions() {
+
+      const { data, error } =
+        await supabaseClient
+          .from("transactions")
+          .select(`
+            *,
+            accounts (
+              account_number
+            )
+          `)
+          .order("created_at", {
+            ascending: false
+          })
+          .limit(20);
+
+      const list =
+        document.getElementById(
+          "staffTransactionList"
+        );
+
+      if (!list) return;
+
+      list.innerHTML = "";
+
+      if (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<tr>
+            <td colspan="6">
+              Unable to load transactions
+            </td>
+          </tr>`;
+
+        return;
+      }
+
+      if (!data || data.length === 0) {
+
+        list.innerHTML =
+          `<tr>
+            <td colspan="6">
+              No transactions found
+            </td>
+          </tr>`;
+
+        return;
+      }
+
+      data.forEach(transaction => {
+
+        const row =
+          document.createElement("tr");
+
+        const type =
+          transaction.transaction_type || "-";
+
+        const typeClass =
+          type === "CREDIT"
+            ? "credit"
+            : "debit";
+
+        const accountNumber =
+          transaction.accounts
+            ? transaction.accounts.account_number
+            : "-";
+
+        row.innerHTML = `
+
+          <td>${accountNumber}</td>
+
+          <td class="${typeClass}">
+            ${type}
+          </td>
+
+          <td>
+            ₹${Number(transaction.amount || 0).toFixed(2)}
+          </td>
+
+          <td>
+            ${transaction.description || "-"}
+          </td>
+
+          <td>
+            ${transaction.reference_number || "-"}
+          </td>
+
+          <td>
+            ${transaction.status || "-"}
+          </td>
+
+        `;
+
+        list.appendChild(row);
+
+      });
+
     }
 
-  } catch (error) {
 
-    console.error("Withdrawal Error:", error);
-    alert("Withdrawal failed.");
-  }
-}
+    // ==========================================
+    // LOGOUT
+    // ==========================================
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="staff.js"></script>
+    document
+      .getElementById("logoutBtn")
+      .addEventListener(
+        "click",
+        async function() {
+
+          await supabaseClient.auth.signOut();
+
+          window.location.href =
+            "index.html";
+
+        }
+      );
+
+
+    // ==========================================
+    // START
+    // ==========================================
+
+    loadStaffTransactions();
+
+  </script>
 
 </body>
 </html>
