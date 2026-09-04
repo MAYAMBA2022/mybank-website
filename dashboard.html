@@ -38,7 +38,10 @@
       padding: 10px 18px;
       background: white;
       color: #2563eb;
+      border: none;
       border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .container {
@@ -72,6 +75,7 @@
     .card p {
       font-size: 22px;
       font-weight: bold;
+      word-break: break-word;
     }
 
     .transactions {
@@ -80,6 +84,7 @@
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+      overflow-x: auto;
     }
 
     table {
@@ -100,16 +105,30 @@
 
     .credit {
       color: green;
+      font-weight: bold;
     }
 
     .debit {
       color: red;
+      font-weight: bold;
     }
 
     #message {
       text-align: center;
       margin-top: 30px;
       color: red;
+      font-weight: bold;
+    }
+
+    .transfer-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -124,7 +143,9 @@
   <div class="container">
 
     <div class="welcome">
-      <h2>Welcome, <span id="customerName">Customer</span> 👋</h2>
+      <h2>
+        Welcome, <span id="customerName">Customer</span> 👋
+      </h2>
       <p>MyBank Account Dashboard</p>
     </div>
 
@@ -167,6 +188,10 @@
 
     </div>
 
+    <a href="transfer.html" class="transfer-btn">
+      Transfer Money
+    </a>
+
     <div id="message"></div>
 
   </div>
@@ -178,13 +203,17 @@
     // SUPABASE SETTINGS
     // ==========================================
 
-    const SUPABASE_URL = "https://ncihofyhnpxrftilejij.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
+    const SUPABASE_URL =
+      "https://ncihofyhnpxrftilejij.supabase.co";
 
-    const supabaseClient = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
 
 
     // ==========================================
@@ -193,124 +222,177 @@
 
     async function loadDashboard() {
 
+      document.getElementById("message").innerText = "";
+
+      // Get logged-in user
       const {
-        data: { user }
+        data: { user },
+        error: userError
       } = await supabaseClient.auth.getUser();
 
 
-      if (!user) {
+      if (userError || !user) {
         window.location.href = "index.html";
         return;
       }
 
 
-      // Customer information
-      const { data: customer, error: customerError } =
-        await supabaseClient
-          .from("customers")
-          .select("*")
-          .eq("email", user.email)
-          .single();
+      // ==========================================
+      // CUSTOMER INFORMATION
+      // ==========================================
+
+      const {
+        data: customer,
+        error: customerError
+      } = await supabaseClient
+        .from("customers")
+        .select("*")
+        .eq("auth_user_id", user.id)
+        .single();
 
 
       if (customerError || !customer) {
+
+        console.error("Customer Error:", customerError);
+
         document.getElementById("message").innerText =
           "Customer information not found.";
+
         return;
       }
 
 
+      // Customer name
       document.getElementById("customerName").innerText =
-        customer.full_name;
+        customer.full_name || "Customer";
 
 
-      // Account information
-     const { data: accounts, error: accountError } =
-  await supabaseClient
-    .from("accounts")
-    .select("*")
-    .eq("customer_id", customer.id)
-    .order("created_at", { ascending: false });
+      // ==========================================
+      // ACCOUNT INFORMATION
+      // ==========================================
 
-if (accountError || !accounts || accounts.length === 0) {
-  document.getElementById("message").innerText =
-    "Account information not found.";
-  return;
-}
-
-const account = accounts[0];
-
-document.getElementById("accountNumber").innerText =
-  account.account_number;
-
-document.getElementById("accountType").innerText =
-  account.account_type;
-
-document.getElementById("balance").innerText =
-  "₹" + Number(account.balance).toFixed(2);
+      const {
+        data: accounts,
+        error: accountError
+      } = await supabaseClient
+        .from("accounts")
+        .select("*")
+        .eq("customer_id", customer.id)
+        .order("created_at", { ascending: false });
 
 
-      if (accountError || !account) {
+      if (accountError) {
+
+        console.error("Account Error:", accountError);
+
+        document.getElementById("message").innerText =
+          "Unable to load account information.";
+
+        return;
+      }
+
+
+      if (!accounts || accounts.length === 0) {
+
         document.getElementById("message").innerText =
           "Account information not found.";
+
         return;
       }
 
 
+      // First account
+      const account = accounts[0];
+
+
+      // Account number
       document.getElementById("accountNumber").innerText =
-        account.account_number;
+        account.account_number || "-";
 
+
+      // Account type
       document.getElementById("accountType").innerText =
-        account.account_type;
+        account.account_type || "-";
 
+
+      // Balance
       document.getElementById("balance").innerText =
-        "₹" + Number(account.balance).toFixed(2);
+        "₹" + Number(account.balance || 0).toFixed(2);
 
 
-      // Transactions
-      const { data: transactions } =
-        await supabaseClient
-          .from("transactions")
-          .select("*")
-          .eq("account_id", account.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
+      // ==========================================
+      // TRANSACTIONS
+      // ==========================================
+
+      const {
+        data: transactions,
+        error: transactionError
+      } = await supabaseClient
+        .from("transactions")
+        .select("*")
+        .eq("account_id", account.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
 
 
       const list =
         document.getElementById("transactionList");
 
+
       list.innerHTML = "";
 
 
-      if (!transactions || transactions.length === 0) {
+      if (transactionError) {
+
+        console.error(
+          "Transaction Error:",
+          transactionError
+        );
 
         list.innerHTML =
           `<tr>
-            <td colspan="4">No transactions found</td>
+            <td colspan="4">
+              Unable to load transactions
+            </td>
           </tr>`;
 
         return;
       }
 
 
+      if (!transactions || transactions.length === 0) {
+
+        list.innerHTML =
+          `<tr>
+            <td colspan="4">
+              No transactions found
+            </td>
+          </tr>`;
+
+        return;
+      }
+
+
+      // Display transactions
       transactions.forEach(function(transaction) {
 
-        const row = document.createElement("tr");
+        const row =
+          document.createElement("tr");
+
 
         const typeClass =
           transaction.transaction_type === "CREDIT"
-          ? "credit"
-          : "debit";
+            ? "credit"
+            : "debit";
 
 
         row.innerHTML = `
           <td class="${typeClass}">
-            ${transaction.transaction_type}
+            ${transaction.transaction_type || "-"}
           </td>
 
           <td>
-            ₹${Number(transaction.amount).toFixed(2)}
+            ₹${Number(transaction.amount || 0).toFixed(2)}
           </td>
 
           <td>
@@ -321,6 +403,7 @@ document.getElementById("balance").innerText =
             ${transaction.status || "-"}
           </td>
         `;
+
 
         list.appendChild(row);
 
@@ -337,12 +420,26 @@ document.getElementById("balance").innerText =
       .getElementById("logoutBtn")
       .addEventListener("click", async function() {
 
-        await supabaseClient.auth.signOut();
+        const { error } =
+          await supabaseClient.auth.signOut();
+
+
+        if (error) {
+
+          console.error("Logout Error:", error);
+
+          return;
+        }
+
 
         window.location.href = "index.html";
 
       });
 
+
+    // ==========================================
+    // START DASHBOARD
+    // ==========================================
 
     loadDashboard();
 
@@ -350,16 +447,3 @@ document.getElementById("balance").innerText =
 
 </body>
 </html>
-<a href="transfer.html"
-   style="
-     display:inline-block;
-     margin-top:20px;
-     padding:12px 20px;
-     background:#2563eb;
-     color:white;
-     text-decoration:none;
-     border-radius:8px;
-     font-weight:bold;
-   ">
-   Transfer Money
-</a>
