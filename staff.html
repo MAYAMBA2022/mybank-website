@@ -1770,6 +1770,221 @@ loadCustomers();
 loadPigmyAgents();
 loadLoanTypes();
 
+  // ==========================================
+// DEPOSIT MONEY
+// ==========================================
+
+async function depositMoney() {
+
+  try {
+
+    const accountNumber =
+      document.getElementById("depositAccount").value.trim();
+
+    const amount =
+      Number(document.getElementById("depositAmount").value);
+
+    const description =
+      document.getElementById("depositDescription").value.trim()
+      || "Cash Deposit";
+
+    if (!accountNumber) {
+      alert("Please enter account number.");
+      return;
+    }
+
+    if (!amount || amount <= 0) {
+      alert("Please enter valid amount.");
+      return;
+    }
+
+    // Find account
+    const { data: account, error: accountError } =
+      await supabaseClient
+        .from("accounts")
+        .select("*")
+        .eq("account_number", accountNumber)
+        .single();
+
+    if (accountError || !account) {
+      alert("Account not found.");
+      return;
+    }
+
+    // Calculate new balance
+    const newBalance =
+      Number(account.balance || 0) + amount;
+
+    // Update balance
+    const { error: updateError } =
+      await supabaseClient
+        .from("accounts")
+        .update({
+          balance: newBalance
+        })
+        .eq("id", account.id);
+
+    if (updateError) {
+      console.error(updateError);
+      alert("Balance update failed.");
+      return;
+    }
+
+    // Save transaction
+    const { error: transactionError } =
+      await supabaseClient
+        .from("transactions")
+        .insert({
+          account_id: account.id,
+          transaction_type: "CREDIT",
+          amount: amount,
+          description: description,
+          status: "SUCCESS"
+        });
+
+    if (transactionError) {
+      console.error(transactionError);
+      alert("Transaction save failed.");
+      return;
+    }
+
+    alert(
+      "Deposit Successful!\n\n" +
+      "Account: " + accountNumber +
+      "\nAmount: ₹" + amount.toFixed(2) +
+      "\nNew Balance: ₹" + newBalance.toFixed(2)
+    );
+
+    document.getElementById("depositAccount").value = "";
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("depositDescription").value = "";
+
+    if (typeof loadDashboard === "function") {
+      loadDashboard();
+    }
+
+  } catch (error) {
+
+    console.error("Deposit Error:", error);
+    alert("Deposit failed.");
+  }
+}
+
+
+// ==========================================
+// WITHDRAW MONEY
+// ==========================================
+
+async function withdrawMoney() {
+
+  try {
+
+    const accountNumber =
+      document.getElementById("withdrawAccount").value.trim();
+
+    const amount =
+      Number(document.getElementById("withdrawAmount").value);
+
+    const description =
+      document.getElementById("withdrawDescription").value.trim()
+      || "Cash Withdrawal";
+
+    if (!accountNumber) {
+      alert("Please enter account number.");
+      return;
+    }
+
+    if (!amount || amount <= 0) {
+      alert("Please enter valid amount.");
+      return;
+    }
+
+    // Find account
+    const { data: account, error: accountError } =
+      await supabaseClient
+        .from("accounts")
+        .select("*")
+        .eq("account_number", accountNumber)
+        .single();
+
+    if (accountError || !account) {
+      alert("Account not found.");
+      return;
+    }
+
+    const currentBalance =
+      Number(account.balance || 0);
+
+    // Check balance
+    if (currentBalance < amount) {
+      alert(
+        "Insufficient Balance!\n\n" +
+        "Available Balance: ₹" +
+        currentBalance.toFixed(2)
+      );
+      return;
+    }
+
+    // Calculate new balance
+    const newBalance =
+      currentBalance - amount;
+
+    // Update balance
+    const { error: updateError } =
+      await supabaseClient
+        .from("accounts")
+        .update({
+          balance: newBalance
+        })
+        .eq("id", account.id);
+
+    if (updateError) {
+      console.error(updateError);
+      alert("Balance update failed.");
+      return;
+    }
+
+    // Save transaction
+    const { error: transactionError } =
+      await supabaseClient
+        .from("transactions")
+        .insert({
+          account_id: account.id,
+          transaction_type: "DEBIT",
+          amount: amount,
+          description: description,
+          status: "SUCCESS"
+        });
+
+    if (transactionError) {
+      console.error(transactionError);
+      alert("Transaction save failed.");
+      return;
+    }
+
+    alert(
+      "Withdrawal Successful!\n\n" +
+      "Account: " + accountNumber +
+      "\nAmount: ₹" + amount.toFixed(2) +
+      "\nRemaining Balance: ₹" +
+      newBalance.toFixed(2)
+    );
+
+    document.getElementById("withdrawAccount").value = "";
+    document.getElementById("withdrawAmount").value = "";
+    document.getElementById("withdrawDescription").value = "";
+
+    if (typeof loadDashboard === "function") {
+      loadDashboard();
+    }
+
+  } catch (error) {
+
+    console.error("Withdrawal Error:", error);
+    alert("Withdrawal failed.");
+  }
+}
+
 </script>
 
 </body>
