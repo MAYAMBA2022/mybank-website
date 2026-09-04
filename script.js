@@ -106,13 +106,16 @@ async function loadDashboard() {
 
   const user = await getCurrentUser();
 
-  // User login केलेला नसेल
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  // Customer information
+
+  // ==========================================
+  // CUSTOMER INFORMATION
+  // ==========================================
+
   const { data: customer, error: customerError } =
     await supabaseClient
       .from("customers")
@@ -120,66 +123,232 @@ async function loadDashboard() {
       .eq("id", user.id)
       .single();
 
-  if (customerError) {
-    console.error(customerError);
+  if (customerError || !customer) {
+    console.error("Customer Error:", customerError);
+
+    const message = document.getElementById("message");
+
+    if (message) {
+      message.innerText =
+        "Customer information not found.";
+    }
+
     return;
   }
 
-  // Account information
+
+  // Customer name
+  const customerName =
+    document.getElementById("customerName");
+
+  if (customerName) {
+    customerName.innerText =
+      customer.full_name;
+  }
+
+
+  // ==========================================
+  // ACCOUNT INFORMATION
+  // ==========================================
+
   const { data: accounts, error: accountError } =
     await supabaseClient
       .from("accounts")
       .select("*")
-      .eq("customer_id", user.id);
+      .eq("customer_id", customer.id)
+      .order("created_at", {
+        ascending: false
+      });
+
 
   if (accountError) {
-    console.error(accountError);
+    console.error("Account Error:", accountError);
+
+    const message =
+      document.getElementById("message");
+
+    if (message) {
+      message.innerText =
+        "Account information error: " +
+        accountError.message;
+    }
+
     return;
   }
+
+
+  if (!accounts || accounts.length === 0) {
+
+    const message =
+      document.getElementById("message");
+
+    if (message) {
+      message.innerText =
+        "Account information not found.";
+    }
+
+    return;
+  }
+
 
   console.log("Customer:", customer);
   console.log("Accounts:", accounts);
 
-  // Example: dashboard मध्ये नाव दाखवणे
-  const welcome = document.getElementById("welcomeName");
-
-  if (welcome) {
-    welcome.innerText =
-      "Welcome, " + customer.full_name;
-  }
 
   // First account
-  if (accounts && accounts.length > 0) {
+  const account = accounts[0];
 
-    const account = accounts[0];
 
-    const accountNumber =
-      document.getElementById("accountNumber");
+  // Account Number
+  const accountNumber =
+    document.getElementById("accountNumber");
 
-    const accountType =
-      document.getElementById("accountType");
-
-    const balance =
-      document.getElementById("balance");
-
-    if (accountNumber) {
-      accountNumber.innerText =
-        account.account_number;
-    }
-
-    if (accountType) {
-      accountType.innerText =
-        account.account_type;
-    }
-
-    if (balance) {
-      balance.innerText =
-        "₹" + Number(account.balance).toFixed(2);
-    }
+  if (accountNumber) {
+    accountNumber.innerText =
+      account.account_number;
   }
 
-  // Load transactions
-  await loadTransactions(user.id);
+
+  // Account Type
+  const accountType =
+    document.getElementById("accountType");
+
+  if (accountType) {
+    accountType.innerText =
+      account.account_type;
+  }
+
+
+  // Balance
+  const balance =
+    document.getElementById("balance");
+
+  if (balance) {
+    balance.innerText =
+      "₹" +
+      Number(account.balance || 0).toFixed(2);
+  }
+
+
+  // ==========================================
+  // TRANSACTIONS
+  // ==========================================
+
+  await loadTransactions(account.id);
+}
+
+
+// ==========================================
+// RECENT TRANSACTIONS
+// ==========================================
+
+async function loadTransactions(accountId) {
+
+  const { data, error } =
+    await supabaseClient
+      .from("transactions")
+      .select("*")
+      .eq("account_id", accountId)
+      .order("created_at", {
+        ascending: false
+      })
+      .limit(10);
+
+
+  if (error) {
+
+    console.error(
+      "Transaction Error:",
+      error
+    );
+
+    const list =
+      document.getElementById(
+        "transactionList"
+      );
+
+    if (list) {
+      list.innerHTML =
+        `<tr>
+          <td colspan="4">
+            Transaction information unavailable
+          </td>
+        </tr>`;
+    }
+
+    return;
+  }
+
+
+  console.log("Transactions:", data);
+
+
+  const list =
+    document.getElementById(
+      "transactionList"
+    );
+
+  if (!list) return;
+
+
+  list.innerHTML = "";
+
+
+  if (!data || data.length === 0) {
+
+    list.innerHTML =
+      `<tr>
+        <td colspan="4">
+          No transactions found
+        </td>
+      </tr>`;
+
+    return;
+  }
+
+
+  data.forEach(transaction => {
+
+    const row =
+      document.createElement("tr");
+
+
+    const type =
+      transaction.transaction_type ||
+      transaction.type ||
+      "";
+
+
+    const typeClass =
+      type === "CREDIT"
+        ? "credit"
+        : "debit";
+
+
+    row.innerHTML = `
+      <td class="${typeClass}">
+        ${type}
+      </td>
+
+      <td>
+        ₹${Number(
+          transaction.amount || 0
+        ).toFixed(2)}
+      </td>
+
+      <td>
+        ${transaction.description || "-"}
+      </td>
+
+      <td>
+        ${transaction.status || "-"}
+      </td>
+    `;
+
+
+    list.appendChild(row);
+
+  });
 }
 
 
