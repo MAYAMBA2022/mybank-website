@@ -30,6 +30,7 @@ body {
     background: #2563eb;
     color: white;
     padding: 18px 30px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -64,6 +65,7 @@ body {
     display: grid;
     grid-template-columns:
         repeat(auto-fit, minmax(320px, 1fr));
+
     gap: 20px;
 }
 
@@ -223,20 +225,47 @@ th {
     font-weight: bold;
 }
 
-.auto-status {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: -5px;
-    margin-bottom: 10px;
+@media(max-width:600px) {
+
+    .header {
+        padding: 15px;
+    }
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .container {
+        padding: 10px;
+        margin: 15px auto;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
-<!-- HEADER -->
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <div class="header">
 
@@ -255,6 +284,7 @@ th {
 
 <div class="container">
 
+
 <div class="welcome">
 
     <h2>Banking Operations</h2>
@@ -267,32 +297,7 @@ th {
 
 
 <div class="grid">
-    
-<!-- =====================================================
-     CUSTOMER SEARCH
-===================================================== -->
 
-<div class="card full">
-
-    <h3>🔎 Customer Search</h3>
-
-    <p class="small">
-        Customer Name किंवा Account Number ने ग्राहक शोधा
-    </p>
-
-    <input
-        type="text"
-        id="customerSearch"
-        placeholder="Enter Customer Name or Account Number"
-        oninput="searchCustomer()">
-
-    <div
-        id="customerSearchResult"
-        class="verify-box">
-
-    </div>
-
-</div>
 
 <!-- =====================================================
      CREATE CUSTOMER
@@ -372,7 +377,6 @@ th {
 </div>
 
 
-
 <!-- =====================================================
      DEPOSIT
 ===================================================== -->
@@ -385,12 +389,7 @@ th {
         type="text"
         id="depositAccount"
         placeholder="Enter Account Number"
-        oninput="handleDepositInput()">
-
-    <div
-        id="depositAutoStatus"
-        class="auto-status">
-    </div>
+        oninput="clearDepositVerification()">
 
     <button
         class="verify-btn"
@@ -403,6 +402,7 @@ th {
     <div
         id="depositVerifyBox"
         class="verify-box">
+
     </div>
 
     <input
@@ -428,7 +428,6 @@ th {
 </div>
 
 
-
 <!-- =====================================================
      WITHDRAWAL
 ===================================================== -->
@@ -441,12 +440,7 @@ th {
         type="text"
         id="withdrawAccount"
         placeholder="Enter Account Number"
-        oninput="handleWithdrawInput()">
-
-    <div
-        id="withdrawAutoStatus"
-        class="auto-status">
-    </div>
+        oninput="clearWithdrawVerification()">
 
     <button
         class="verify-btn"
@@ -459,6 +453,7 @@ th {
     <div
         id="withdrawVerifyBox"
         class="verify-box">
+
     </div>
 
     <input
@@ -484,7 +479,6 @@ th {
 </div>
 
 
-
 <!-- =====================================================
      TRANSFER
 ===================================================== -->
@@ -497,33 +491,7 @@ th {
         type="text"
         id="fromAccount"
         placeholder="From Account Number"
-        oninput="handleFromAccountInput()">
-
-    <div
-        id="fromAutoStatus"
-        class="auto-status">
-    </div>
-
-    <div
-        id="fromVerifyBox"
-        class="verify-box">
-    </div>
-
-    <input
-        type="text"
-        id="toAccount"
-        placeholder="To Account Number"
-        oninput="handleToAccountInput()">
-
-    <div
-        id="toAutoStatus"
-        class="auto-status">
-    </div>
-
-    <div
-        id="toVerifyBox"
-        class="verify-box">
-    </div>
+        oninput="clearTransferVerification()">
 
     <button
         class="verify-btn"
@@ -532,6 +500,24 @@ th {
         🔍 Verify Both Accounts
 
     </button>
+
+    <div
+        id="fromVerifyBox"
+        class="verify-box">
+
+    </div>
+
+    <input
+        type="text"
+        id="toAccount"
+        placeholder="To Account Number"
+        oninput="clearTransferVerification()">
+
+    <div
+        id="toVerifyBox"
+        class="verify-box">
+
+    </div>
 
     <input
         type="number"
@@ -546,6 +532,7 @@ th {
 
     <button
         class="orange"
+        id="transferBtn"
         onclick="transferMoney()">
 
         Transfer Money
@@ -555,9 +542,8 @@ th {
 </div>
 
 
-
 <!-- =====================================================
-     TRANSACTION HISTORY
+     RECENT TRANSACTIONS
 ===================================================== -->
 
 <div class="card full">
@@ -624,63 +610,42 @@ supabase.createClient(
 
 
 // =====================================================
-// VERIFIED ACCOUNT VARIABLES
-// =====================================================
-
-let verifiedDepositAccount = null;
-
-let verifiedWithdrawAccount = null;
-
-let verifiedFromAccount = null;
-
-let verifiedToAccount = null;
-
-
-// =====================================================
 // CUSTOMER CREATE
 // =====================================================
 
 async function createCustomerAndAccount() {
 
     const name =
-        document.getElementById(
-            "newCustomerName"
-        ).value.trim();
+        document.getElementById("newCustomerName")
+        .value.trim();
 
     const address =
-        document.getElementById(
-            "newCustomerAddress"
-        ).value.trim();
+        document.getElementById("newCustomerAddress")
+        .value.trim();
 
     const aadhaar =
-        document.getElementById(
-            "newCustomerAadhaar"
-        ).value.trim();
+        document.getElementById("newCustomerAadhaar")
+        .value.trim();
 
     const pan =
-        document.getElementById(
-            "newCustomerPan"
-        ).value.trim().toUpperCase();
+        document.getElementById("newCustomerPan")
+        .value.trim()
+        .toUpperCase();
 
     const mobile =
-        document.getElementById(
-            "newCustomerMobile"
-        ).value.trim();
+        document.getElementById("newCustomerMobile")
+        .value.trim();
 
     const email =
-        document.getElementById(
-            "newCustomerEmail"
-        ).value.trim();
+        document.getElementById("newCustomerEmail")
+        .value.trim();
 
     const accountType =
-        document.getElementById(
-            "accountTypeSelect"
-        ).value;
+        document.getElementById("accountTypeSelect")
+        .value;
 
     const message =
-        document.getElementById(
-            "accountCreateMessage"
-        );
+        document.getElementById("accountCreateMessage");
 
 
     if (!name) {
@@ -747,16 +712,13 @@ async function createCustomerAndAccount() {
 
 
     message.innerHTML =
-    "Creating Customer & Account...";
+    "Creating Customer...";
 
     message.className =
     "result";
 
 
     try {
-
-        // CUSTOMER CREATE
-        // Customer ID automatic from database
 
         const {
             data: customer,
@@ -767,18 +729,11 @@ async function createCustomerAndAccount() {
         .insert({
 
             full_name: name,
-
             address: address,
-
             aadhaar_number: aadhaar,
-
             pan_number: pan,
-
-            mobile:
-                mobile || null,
-
-            email:
-                email || null
+            mobile: mobile || null,
+            email: email || null
 
         })
         .select(
@@ -799,9 +754,6 @@ async function createCustomerAndAccount() {
             return;
         }
 
-
-        // ACCOUNT CREATE
-        // Account Number automatic from database
 
         const {
             data: account,
@@ -862,35 +814,13 @@ async function createCustomerAndAccount() {
         "result success";
 
 
-        // CLEAR FORM
-
-        document.getElementById(
-            "newCustomerName"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerAddress"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerAadhaar"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerPan"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerMobile"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerEmail"
-        ).value = "";
-
-        document.getElementById(
-            "newCustomerPhoto"
-        ).value = "";
+        document.getElementById("newCustomerName").value = "";
+        document.getElementById("newCustomerAddress").value = "";
+        document.getElementById("newCustomerAadhaar").value = "";
+        document.getElementById("newCustomerPan").value = "";
+        document.getElementById("newCustomerMobile").value = "";
+        document.getElementById("newCustomerEmail").value = "";
+        document.getElementById("newCustomerPhoto").value = "";
 
     }
 
@@ -899,8 +829,7 @@ async function createCustomerAndAccount() {
         console.error(error);
 
         message.innerHTML =
-        "❌ Error: " +
-        error.message;
+        "❌ Error: " + error.message;
 
         message.className =
         "result error";
@@ -910,15 +839,42 @@ async function createCustomerAndAccount() {
 }
 
 
-
 // =====================================================
-// COMMON ACCOUNT VERIFICATION
+// DEPOSIT VERIFICATION
 // =====================================================
 
-async function getAccountDetails(accountNumber) {
+let verifiedDepositAccount = null;
+
+
+async function verifyDepositAccount() {
+
+    const accountNumber =
+        document.getElementById("depositAccount")
+        .value.trim();
+
+    const box =
+        document.getElementById("depositVerifyBox");
+
+
+    verifiedDepositAccount = null;
+
+    box.style.display = "block";
+
+
+    if (!accountNumber) {
+
+        box.innerHTML =
+        "❌ Please enter Account Number.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
 
     const {
-        data,
+        data: account,
         error
     } =
     await supabaseClient
@@ -938,141 +894,10 @@ async function getAccountDetails(accountNumber) {
         "account_number",
         accountNumber
     )
-    .maybeSingle();
+    .single();
 
 
-    if (error) {
-
-        console.error(error);
-
-        return {
-            account: null,
-            error: error.message
-        };
-
-    }
-
-
-    if (!data) {
-
-        return {
-            account: null,
-            error: "Account Not Found"
-        };
-
-    }
-
-
-    return {
-        account: data,
-        error: null
-    };
-
-}
-
-
-
-// =====================================================
-// DEPOSIT INPUT
-// =====================================================
-
-let depositTimer = null;
-
-
-function handleDepositInput() {
-
-    clearDepositVerification();
-
-    clearTimeout(depositTimer);
-
-
-    const accountNumber =
-        document.getElementById(
-            "depositAccount"
-        ).value.trim();
-
-
-    if (!accountNumber) return;
-
-
-    document.getElementById(
-        "depositAutoStatus"
-    ).innerHTML =
-    "🔄 Verifying account...";
-
-
-    depositTimer =
-    setTimeout(
-        function() {
-
-            verifyDepositAccount();
-
-        },
-        400
-    );
-
-}
-
-
-
-// =====================================================
-// DEPOSIT VERIFY
-// =====================================================
-
-async function verifyDepositAccount() {
-
-    const accountNumber =
-        document.getElementById(
-            "depositAccount"
-        ).value.trim();
-
-    const box =
-        document.getElementById(
-            "depositVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "depositAutoStatus"
-        );
-
-
-    verifiedDepositAccount = null;
-
-    box.style.display = "block";
-
-
-    if (!accountNumber) {
-
-        status.innerHTML = "";
-
-        box.innerHTML =
-        "❌ Please enter Account Number.";
-
-        box.className =
-        "verify-box verify-error";
-
-        return;
-    }
-
-
-    status.innerHTML =
-    "🔄 Verifying...";
-
-
-    const result =
-        await getAccountDetails(
-            accountNumber
-        );
-
-
-    if (
-        result.error ||
-        !result.account
-    ) {
-
-        status.innerHTML =
-        "❌ Account not found";
+    if (error || !account) {
 
         box.innerHTML =
         "❌ Account Not Found.";
@@ -1084,16 +909,8 @@ async function verifyDepositAccount() {
     }
 
 
-    const account =
-        result.account;
-
-
     verifiedDepositAccount =
         account;
-
-
-    status.innerHTML =
-    "✅ Account Verified";
 
 
     box.innerHTML =
@@ -1116,7 +933,7 @@ async function verifyDepositAccount() {
     account.account_type +
     "</strong><br>" +
 
-    "Previous Balance: <strong>₹" +
+    "Current Balance: <strong>₹" +
     Number(account.balance || 0).toFixed(2) +
     "</strong>";
 
@@ -1127,7 +944,6 @@ async function verifyDepositAccount() {
 }
 
 
-
 // =====================================================
 // CLEAR DEPOSIT
 // =====================================================
@@ -1136,34 +952,11 @@ function clearDepositVerification() {
 
     verifiedDepositAccount = null;
 
-    const box =
-        document.getElementById(
-            "depositVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "depositAutoStatus"
-        );
-
-
-    if (box) {
-
-        box.style.display = "none";
-
-        box.innerHTML = "";
-
-    }
-
-
-    if (status) {
-
-        status.innerHTML = "";
-
-    }
+    document.getElementById(
+        "depositVerifyBox"
+    ).style.display = "none";
 
 }
-
 
 
 // =====================================================
@@ -1183,23 +976,18 @@ async function depositMoney() {
 
 
     const accountNumber =
-        document.getElementById(
-            "depositAccount"
-        ).value.trim();
-
+        document.getElementById("depositAccount")
+        .value.trim();
 
     const amount =
         Number(
-            document.getElementById(
-                "depositAmount"
-            ).value
+            document.getElementById("depositAmount")
+            .value
         );
 
-
     const description =
-        document.getElementById(
-            "depositDescription"
-        ).value.trim()
+        document.getElementById("depositDescription")
+        .value.trim()
         || "Cash Deposit";
 
 
@@ -1211,8 +999,6 @@ async function depositMoney() {
         alert(
             "Account changed. Please verify again."
         );
-
-        clearDepositVerification();
 
         return;
     }
@@ -1232,7 +1018,6 @@ async function depositMoney() {
         Number(
             verifiedDepositAccount.balance || 0
         );
-
 
     const newBalance =
         currentBalance + amount;
@@ -1265,6 +1050,11 @@ async function depositMoney() {
     }
 
 
+    // UNIQUE REFERENCE
+    const reference =
+        "DEP-" + crypto.randomUUID();
+
+
     const {
         error: transactionError
     } =
@@ -1285,7 +1075,7 @@ async function depositMoney() {
             description,
 
         reference_number:
-            "DEP-" + Date.now(),
+            reference,
 
         status:
             "SUCCESS"
@@ -1324,18 +1114,9 @@ async function depositMoney() {
     );
 
 
-    document.getElementById(
-        "depositAccount"
-    ).value = "";
-
-    document.getElementById(
-        "depositAmount"
-    ).value = "";
-
-    document.getElementById(
-        "depositDescription"
-    ).value = "";
-
+    document.getElementById("depositAccount").value = "";
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("depositDescription").value = "";
 
     clearDepositVerification();
 
@@ -1344,70 +1125,21 @@ async function depositMoney() {
 }
 
 
-
 // =====================================================
-// WITHDRAW INPUT
+// WITHDRAW VERIFICATION
 // =====================================================
 
-let withdrawTimer = null;
+let verifiedWithdrawAccount = null;
 
-
-function handleWithdrawInput() {
-
-    clearWithdrawVerification();
-
-    clearTimeout(withdrawTimer);
-
-
-    const accountNumber =
-        document.getElementById(
-            "withdrawAccount"
-        ).value.trim();
-
-
-    if (!accountNumber) return;
-
-
-    document.getElementById(
-        "withdrawAutoStatus"
-    ).innerHTML =
-    "🔄 Verifying account...";
-
-
-    withdrawTimer =
-    setTimeout(
-        function() {
-
-            verifyWithdrawAccount();
-
-        },
-        400
-    );
-
-}
-
-
-
-// =====================================================
-// WITHDRAW VERIFY
-// =====================================================
 
 async function verifyWithdrawAccount() {
 
     const accountNumber =
-        document.getElementById(
-            "withdrawAccount"
-        ).value.trim();
+        document.getElementById("withdrawAccount")
+        .value.trim();
 
     const box =
-        document.getElementById(
-            "withdrawVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "withdrawAutoStatus"
-        );
+        document.getElementById("withdrawVerifyBox");
 
 
     verifiedWithdrawAccount = null;
@@ -1416,8 +1148,6 @@ async function verifyWithdrawAccount() {
 
 
     if (!accountNumber) {
-
-        status.innerHTML = "";
 
         box.innerHTML =
         "❌ Please enter Account Number.";
@@ -1429,23 +1159,31 @@ async function verifyWithdrawAccount() {
     }
 
 
-    status.innerHTML =
-    "🔄 Verifying...";
+    const {
+        data: account,
+        error
+    } =
+    await supabaseClient
+    .from("accounts")
+    .select(`
+        id,
+        account_number,
+        account_type,
+        balance,
+        customers (
+            customer_number,
+            full_name,
+            mobile
+        )
+    `)
+    .eq(
+        "account_number",
+        accountNumber
+    )
+    .single();
 
 
-    const result =
-        await getAccountDetails(
-            accountNumber
-        );
-
-
-    if (
-        result.error ||
-        !result.account
-    ) {
-
-        status.innerHTML =
-        "❌ Account not found";
+    if (error || !account) {
 
         box.innerHTML =
         "❌ Account Not Found.";
@@ -1457,16 +1195,8 @@ async function verifyWithdrawAccount() {
     }
 
 
-    const account =
-        result.account;
-
-
     verifiedWithdrawAccount =
-        account;
-
-
-    status.innerHTML =
-    "✅ Account Verified";
+    account;
 
 
     box.innerHTML =
@@ -1489,7 +1219,7 @@ async function verifyWithdrawAccount() {
     account.account_type +
     "</strong><br>" +
 
-    "Previous Balance: <strong>₹" +
+    "Current Balance: <strong>₹" +
     Number(account.balance || 0).toFixed(2) +
     "</strong>";
 
@@ -1500,7 +1230,6 @@ async function verifyWithdrawAccount() {
 }
 
 
-
 // =====================================================
 // CLEAR WITHDRAW
 // =====================================================
@@ -1509,34 +1238,11 @@ function clearWithdrawVerification() {
 
     verifiedWithdrawAccount = null;
 
-    const box =
-        document.getElementById(
-            "withdrawVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "withdrawAutoStatus"
-        );
-
-
-    if (box) {
-
-        box.style.display = "none";
-
-        box.innerHTML = "";
-
-    }
-
-
-    if (status) {
-
-        status.innerHTML = "";
-
-    }
+    document.getElementById(
+        "withdrawVerifyBox"
+    ).style.display = "none";
 
 }
-
 
 
 // =====================================================
@@ -1556,23 +1262,18 @@ async function withdrawMoney() {
 
 
     const accountNumber =
-        document.getElementById(
-            "withdrawAccount"
-        ).value.trim();
-
+        document.getElementById("withdrawAccount")
+        .value.trim();
 
     const amount =
         Number(
-            document.getElementById(
-                "withdrawAmount"
-            ).value
+            document.getElementById("withdrawAmount")
+            .value
         );
 
-
     const description =
-        document.getElementById(
-            "withdrawDescription"
-        ).value.trim()
+        document.getElementById("withdrawDescription")
+        .value.trim()
         || "Cash Withdrawal";
 
 
@@ -1584,8 +1285,6 @@ async function withdrawMoney() {
         alert(
             "Account changed. Please verify again."
         );
-
-        clearWithdrawVerification();
 
         return;
     }
@@ -1654,6 +1353,11 @@ async function withdrawMoney() {
     }
 
 
+    // UNIQUE REFERENCE
+    const reference =
+        "WDL-" + crypto.randomUUID();
+
+
     const {
         error: transactionError
     } =
@@ -1674,7 +1378,7 @@ async function withdrawMoney() {
             description,
 
         reference_number:
-            "WDL-" + Date.now(),
+            reference,
 
         status:
             "SUCCESS"
@@ -1713,18 +1417,9 @@ async function withdrawMoney() {
     );
 
 
-    document.getElementById(
-        "withdrawAccount"
-    ).value = "";
-
-    document.getElementById(
-        "withdrawAmount"
-    ).value = "";
-
-    document.getElementById(
-        "withdrawDescription"
-    ).value = "";
-
+    document.getElementById("withdrawAccount").value = "";
+    document.getElementById("withdrawAmount").value = "";
+    document.getElementById("withdrawDescription").value = "";
 
     clearWithdrawVerification();
 
@@ -1733,420 +1428,231 @@ async function withdrawMoney() {
 }
 
 
-
 // =====================================================
-// FROM ACCOUNT INPUT
-// =====================================================
-
-let fromTimer = null;
-
-
-function handleFromAccountInput() {
-
-    verifiedFromAccount = null;
-
-    const box =
-        document.getElementById(
-            "fromVerifyBox"
-        );
-
-    box.style.display = "none";
-
-    clearTimeout(fromTimer);
-
-
-    const accountNumber =
-        document.getElementById(
-            "fromAccount"
-        ).value.trim();
-
-
-    if (!accountNumber) {
-
-        document.getElementById(
-            "fromAutoStatus"
-        ).innerHTML = "";
-
-        return;
-    }
-
-
-    document.getElementById(
-        "fromAutoStatus"
-    ).innerHTML =
-    "🔄 Verifying...";
-
-
-    fromTimer =
-    setTimeout(
-        function() {
-
-            verifyFromAccount();
-
-        },
-        400
-    );
-
-}
-
-
-
-// =====================================================
-// VERIFY FROM ACCOUNT
+// TRANSFER VERIFICATION
 // =====================================================
 
-async function verifyFromAccount() {
+let verifiedFromAccount = null;
+let verifiedToAccount = null;
 
-    const accountNumber =
-        document.getElementById(
-            "fromAccount"
-        ).value.trim();
-
-    const box =
-        document.getElementById(
-            "fromVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "fromAutoStatus"
-        );
-
-
-    if (!accountNumber) return;
-
-
-    const result =
-        await getAccountDetails(
-            accountNumber
-        );
-
-
-    if (
-        result.error ||
-        !result.account
-    ) {
-
-        verifiedFromAccount = null;
-
-        status.innerHTML =
-        "❌ From Account Not Found";
-
-        box.style.display = "block";
-
-        box.innerHTML =
-        "❌ From Account Not Found.";
-
-        box.className =
-        "verify-box verify-error";
-
-        return;
-    }
-
-
-    const account =
-        result.account;
-
-
-    verifiedFromAccount =
-        account;
-
-
-    status.innerHTML =
-    "✅ From Account Verified";
-
-
-    box.style.display = "block";
-
-
-    box.innerHTML =
-
-    "✅ <strong>FROM ACCOUNT VERIFIED</strong><br>" +
-
-    "Customer Name: <strong>" +
-    (account.customers?.full_name || "-") +
-    "</strong><br>" +
-
-    "Customer ID: <strong>" +
-    (account.customers?.customer_number || "-") +
-    "</strong><br>" +
-
-    "Account Number: <strong>" +
-    account.account_number +
-    "</strong><br>" +
-
-    "Account Type: <strong>" +
-    account.account_type +
-    "</strong><br>" +
-
-    "Previous Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
-
-
-    box.className =
-    "verify-box verify-success";
-
-}
-
-
-
-// =====================================================
-// TO ACCOUNT INPUT
-// =====================================================
-
-let toTimer = null;
-
-
-function handleToAccountInput() {
-
-    verifiedToAccount = null;
-
-    const box =
-        document.getElementById(
-            "toVerifyBox"
-        );
-
-    box.style.display = "none";
-
-    clearTimeout(toTimer);
-
-
-    const accountNumber =
-        document.getElementById(
-            "toAccount"
-        ).value.trim();
-
-
-    if (!accountNumber) {
-
-        document.getElementById(
-            "toAutoStatus"
-        ).innerHTML = "";
-
-        return;
-    }
-
-
-    document.getElementById(
-        "toAutoStatus"
-    ).innerHTML =
-    "🔄 Verifying...";
-
-
-    toTimer =
-    setTimeout(
-        function() {
-
-            verifyToAccount();
-
-        },
-        400
-    );
-
-}
-
-
-
-// =====================================================
-// VERIFY TO ACCOUNT
-// =====================================================
-
-async function verifyToAccount() {
-
-    const accountNumber =
-        document.getElementById(
-            "toAccount"
-        ).value.trim();
-
-    const box =
-        document.getElementById(
-            "toVerifyBox"
-        );
-
-    const status =
-        document.getElementById(
-            "toAutoStatus"
-        );
-
-
-    if (!accountNumber) return;
-
-
-    const result =
-        await getAccountDetails(
-            accountNumber
-        );
-
-
-    if (
-        result.error ||
-        !result.account
-    ) {
-
-        verifiedToAccount = null;
-
-        status.innerHTML =
-        "❌ To Account Not Found";
-
-        box.style.display = "block";
-
-        box.innerHTML =
-        "❌ To Account Not Found.";
-
-        box.className =
-        "verify-box verify-error";
-
-        return;
-    }
-
-
-    const account =
-        result.account;
-
-
-    verifiedToAccount =
-        account;
-
-
-    status.innerHTML =
-    "✅ To Account Verified";
-
-
-    box.style.display = "block";
-
-
-    box.innerHTML =
-
-    "✅ <strong>TO ACCOUNT VERIFIED</strong><br>" +
-
-    "Customer Name: <strong>" +
-    (account.customers?.full_name || "-") +
-    "</strong><br>" +
-
-    "Customer ID: <strong>" +
-    (account.customers?.customer_number || "-") +
-    "</strong><br>" +
-
-    "Account Number: <strong>" +
-    account.account_number +
-    "</strong><br>" +
-
-    "Account Type: <strong>" +
-    account.account_type +
-    "</strong><br>" +
-
-    "Previous Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
-
-
-    box.className =
-    "verify-box verify-success";
-
-}
-
-
-
-// =====================================================
-// VERIFY BOTH TRANSFER ACCOUNTS
-// =====================================================
 
 async function verifyTransferAccounts() {
 
-    await verifyFromAccount();
+    const fromAccount =
+        document.getElementById("fromAccount")
+        .value.trim();
 
-    await verifyToAccount();
+    const toAccount =
+        document.getElementById("toAccount")
+        .value.trim();
+
+    const fromBox =
+        document.getElementById("fromVerifyBox");
+
+    const toBox =
+        document.getElementById("toVerifyBox");
+
+
+    verifiedFromAccount = null;
+    verifiedToAccount = null;
+
+
+    fromBox.style.display = "block";
+    toBox.style.display = "block";
+
+
+    if (!fromAccount) {
+
+        fromBox.innerHTML =
+        "❌ Enter From Account Number.";
+
+        fromBox.className =
+        "verify-box verify-error";
+
+    }
+
+
+    if (!toAccount) {
+
+        toBox.innerHTML =
+        "❌ Enter To Account Number.";
+
+        toBox.className =
+        "verify-box verify-error";
+
+    }
+
+
+    if (!fromAccount || !toAccount) {
+        return;
+    }
+
+
+    // FROM ACCOUNT
+
+    const {
+        data: sender,
+        error: senderError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .select(`
+        id,
+        account_number,
+        account_type,
+        balance,
+        customers (
+            customer_number,
+            full_name,
+            mobile
+        )
+    `)
+    .eq(
+        "account_number",
+        fromAccount
+    )
+    .single();
+
+
+    if (senderError || !sender) {
+
+        fromBox.innerHTML =
+        "❌ From Account Not Found.";
+
+        fromBox.className =
+        "verify-box verify-error";
+
+    }
+    else {
+
+        verifiedFromAccount =
+            sender;
+
+
+        fromBox.innerHTML =
+
+        "✅ <strong>FROM ACCOUNT VERIFIED</strong><br>" +
+
+        "Customer Name: <strong>" +
+        (sender.customers?.full_name || "-") +
+        "</strong><br>" +
+
+        "Customer ID: <strong>" +
+        (sender.customers?.customer_number || "-") +
+        "</strong><br>" +
+
+        "Account Number: <strong>" +
+        sender.account_number +
+        "</strong><br>" +
+
+        "Account Type: <strong>" +
+        sender.account_type +
+        "</strong><br>" +
+
+        "Current Balance: <strong>₹" +
+        Number(sender.balance || 0).toFixed(2) +
+        "</strong>";
+
+        fromBox.className =
+        "verify-box verify-success";
+
+    }
+
+
+    // TO ACCOUNT
+
+    const {
+        data: receiver,
+        error: receiverError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .select(`
+        id,
+        account_number,
+        account_type,
+        balance,
+        customers (
+            customer_number,
+            full_name,
+            mobile
+        )
+    `)
+    .eq(
+        "account_number",
+        toAccount
+    )
+    .single();
 
 
     if (
-        verifiedFromAccount &&
-        verifiedToAccount
+        receiverError ||
+        !receiver
     ) {
 
-        if (
-            verifiedFromAccount.account_number ===
-            verifiedToAccount.account_number
-        ) {
+        toBox.innerHTML =
+        "❌ To Account Not Found.";
 
-            alert(
-                "From and To Account cannot be same."
-            );
+        toBox.className =
+        "verify-box verify-error";
 
-            verifiedToAccount = null;
+    }
+    else {
 
-            return;
-        }
+        verifiedToAccount =
+            receiver;
 
 
-        alert(
-            "Both Accounts Verified Successfully."
-        );
+        toBox.innerHTML =
+
+        "✅ <strong>TO ACCOUNT VERIFIED</strong><br>" +
+
+        "Customer Name: <strong>" +
+        (receiver.customers?.full_name || "-") +
+        "</strong><br>" +
+
+        "Customer ID: <strong>" +
+        (receiver.customers?.customer_number || "-") +
+        "</strong><br>" +
+
+        "Account Number: <strong>" +
+        receiver.account_number +
+        "</strong><br>" +
+
+        "Account Type: <strong>" +
+        receiver.account_type +
+        "</strong><br>" +
+
+        "Current Balance: <strong>₹" +
+        Number(receiver.balance || 0).toFixed(2) +
+        "</strong>";
+
+        toBox.className =
+        "verify-box verify-success";
 
     }
 
 }
 
 
-
 // =====================================================
-// CLEAR TRANSFER
+// CLEAR TRANSFER VERIFICATION
 // =====================================================
 
 function clearTransferVerification() {
 
     verifiedFromAccount = null;
-
     verifiedToAccount = null;
 
+    document.getElementById(
+        "fromVerifyBox"
+    ).style.display = "none";
 
-    const fromBox =
-        document.getElementById(
-            "fromVerifyBox"
-        );
-
-    const toBox =
-        document.getElementById(
-            "toVerifyBox"
-        );
-
-
-    if (fromBox) {
-
-        fromBox.style.display = "none";
-        fromBox.innerHTML = "";
-
-    }
-
-
-    if (toBox) {
-
-        toBox.style.display = "none";
-        toBox.innerHTML = "";
-
-    }
-
-
-    const fromStatus =
-        document.getElementById(
-            "fromAutoStatus"
-        );
-
-    const toStatus =
-        document.getElementById(
-            "toAutoStatus"
-        );
-
-
-    if (fromStatus)
-        fromStatus.innerHTML = "";
-
-
-    if (toStatus)
-        toStatus.innerHTML = "";
+    document.getElementById(
+        "toVerifyBox"
+    ).style.display = "none";
 
 }
-
 
 
 // =====================================================
@@ -2169,29 +1675,22 @@ async function transferMoney() {
 
 
     const fromAccount =
-        document.getElementById(
-            "fromAccount"
-        ).value.trim();
-
+        document.getElementById("fromAccount")
+        .value.trim();
 
     const toAccount =
-        document.getElementById(
-            "toAccount"
-        ).value.trim();
-
+        document.getElementById("toAccount")
+        .value.trim();
 
     const amount =
         Number(
-            document.getElementById(
-                "transferAmount"
-            ).value
+            document.getElementById("transferAmount")
+            .value
         );
 
-
     const description =
-        document.getElementById(
-            "transferDescription"
-        ).value.trim()
+        document.getElementById("transferDescription")
+        .value.trim()
         || "Money Transfer";
 
 
@@ -2203,8 +1702,6 @@ async function transferMoney() {
         alert(
             "From Account changed. Please verify again."
         );
-
-        clearTransferVerification();
 
         return;
     }
@@ -2218,8 +1715,6 @@ async function transferMoney() {
         alert(
             "To Account changed. Please verify again."
         );
-
-        clearTransferVerification();
 
         return;
     }
@@ -2256,7 +1751,6 @@ async function transferMoney() {
             verifiedFromAccount.balance || 0
         );
 
-
     const receiverBalance =
         Number(
             verifiedToAccount.balance || 0
@@ -2270,8 +1764,7 @@ async function transferMoney() {
 
             "Customer: " +
             (
-                verifiedFromAccount
-                .customers
+                verifiedFromAccount.customers
                 ?.full_name || "-"
             ) +
 
@@ -2286,16 +1779,31 @@ async function transferMoney() {
     const newSenderBalance =
         senderBalance - amount;
 
-
     const newReceiverBalance =
         receiverBalance + amount;
 
 
-    const reference =
-        "TRF-" + Date.now();
+    // =================================================
+    // UNIQUE TRANSFER REFERENCES
+    // =================================================
+
+    const transferId =
+        crypto.randomUUID();
+
+    const debitReference =
+        "TRF-" +
+        transferId +
+        "-D";
+
+    const creditReference =
+        "TRF-" +
+        transferId +
+        "-C";
 
 
+    // =================================================
     // UPDATE SENDER
+    // =================================================
 
     const {
         error: senderUpdateError
@@ -2325,7 +1833,9 @@ async function transferMoney() {
     }
 
 
+    // =================================================
     // UPDATE RECEIVER
+    // =================================================
 
     const {
         error: receiverUpdateError
@@ -2355,7 +1865,9 @@ async function transferMoney() {
     }
 
 
+    // =================================================
     // DEBIT TRANSACTION
+    // =================================================
 
     const {
         error: debitError
@@ -2377,7 +1889,7 @@ async function transferMoney() {
             description,
 
         reference_number:
-            reference,
+            debitReference,
 
         status:
             "SUCCESS"
@@ -2396,7 +1908,9 @@ async function transferMoney() {
     }
 
 
+    // =================================================
     // CREDIT TRANSACTION
+    // =================================================
 
     const {
         error: creditError
@@ -2418,7 +1932,7 @@ async function transferMoney() {
             description,
 
         reference_number:
-            reference,
+            creditReference,
 
         status:
             "SUCCESS"
@@ -2437,14 +1951,17 @@ async function transferMoney() {
     }
 
 
+    // =================================================
+    // SUCCESS
+    // =================================================
+
     alert(
 
         "Transfer Successful!\n\n" +
 
         "From Customer: " +
         (
-            verifiedFromAccount
-            .customers
+            verifiedFromAccount.customers
             ?.full_name || "-"
         ) +
 
@@ -2453,8 +1970,7 @@ async function transferMoney() {
 
         "\n\nTo Customer: " +
         (
-            verifiedToAccount
-            .customers
+            verifiedToAccount.customers
             ?.full_name || "-"
         ) +
 
@@ -2470,29 +1986,16 @@ async function transferMoney() {
     );
 
 
-    document.getElementById(
-        "fromAccount"
-    ).value = "";
-
-    document.getElementById(
-        "toAccount"
-    ).value = "";
-
-    document.getElementById(
-        "transferAmount"
-    ).value = "";
-
-    document.getElementById(
-        "transferDescription"
-    ).value = "";
-
+    document.getElementById("fromAccount").value = "";
+    document.getElementById("toAccount").value = "";
+    document.getElementById("transferAmount").value = "";
+    document.getElementById("transferDescription").value = "";
 
     clearTransferVerification();
 
     loadTransactions();
 
 }
-
 
 
 // =====================================================
@@ -2636,7 +2139,6 @@ async function loadTransactions() {
 }
 
 
-
 // =====================================================
 // LOGOUT
 // =====================================================
@@ -2673,405 +2175,12 @@ document
 );
 
 
-
 // =====================================================
 // START
 // =====================================================
 
-    // =====================================================
-// CUSTOMER SEARCH
-// SEARCH BY NAME OR ACCOUNT NUMBER
-// =====================================================
-
-let customerSearchTimer = null;
-
-async function searchCustomer() {
-
-    const searchValue =
-        document.getElementById("customerSearch")
-        .value
-        .trim();
-
-    const box =
-        document.getElementById("customerSearchResult");
-
-    clearTimeout(customerSearchTimer);
-
-    if (!searchValue) {
-
-        box.style.display = "none";
-        box.innerHTML = "";
-        return;
-    }
-
-    box.style.display = "block";
-
-    box.className = "verify-box";
-
-    box.innerHTML = "🔍 Searching...";
-
-    customerSearchTimer = setTimeout(
-        async function() {
-
-            try {
-
-                // -----------------------------------------
-                // ACCOUNT NUMBER SEARCH
-                // -----------------------------------------
-
-                const {
-                    data: account,
-                    error: accountError
-                } =
-                await supabaseClient
-                .from("accounts")
-                .select(`
-                    id,
-                    account_number,
-                    account_type,
-                    balance,
-                    customers (
-                        id,
-                        customer_number,
-                        full_name,
-                        address,
-                        aadhaar_number,
-                        pan_number,
-                        mobile,
-                        email
-                    )
-                `)
-                .eq(
-                    "account_number",
-                    searchValue
-                )
-                .maybeSingle();
-
-
-                // -----------------------------------------
-                // IF ACCOUNT NUMBER FOUND
-                // -----------------------------------------
-
-                if (account && !accountError) {
-
-                    showCustomerSearchResult(
-                        account,
-                        account.customers
-                    );
-
-                    return;
-                }
-
-
-                // -----------------------------------------
-                // SEARCH CUSTOMER BY NAME
-                // -----------------------------------------
-
-                const {
-                    data: customers,
-                    error: customerError
-                } =
-                await supabaseClient
-                .from("customers")
-                .select(`
-                    id,
-                    customer_number,
-                    full_name,
-                    address,
-                    aadhaar_number,
-                    pan_number,
-                    mobile,
-                    email,
-                    accounts (
-                        id,
-                        account_number,
-                        account_type,
-                        balance
-                    )
-                `)
-                .ilike(
-                    "full_name",
-                    "%" + searchValue + "%"
-                )
-                .limit(10);
-
-
-                if (
-                    customerError ||
-                    !customers ||
-                    customers.length === 0
-                ) {
-
-                    box.innerHTML =
-                    "❌ Customer Not Found.";
-
-                    box.className =
-                    "verify-box verify-error";
-
-                    return;
-                }
-
-
-                // -----------------------------------------
-                // ONE CUSTOMER
-                // -----------------------------------------
-
-                if (customers.length === 1) {
-
-                    const customer =
-                        customers[0];
-
-                    const accounts =
-                        customer.accounts || [];
-
-                    if (accounts.length === 0) {
-
-                        box.innerHTML =
-                        "⚠️ Customer found, but no account exists.";
-
-                        box.className =
-                        "verify-box verify-error";
-
-                        return;
-                    }
-
-
-                    if (accounts.length === 1) {
-
-                        showCustomerSearchResult(
-                            accounts[0],
-                            customer
-                        );
-
-                        return;
-                    }
-
-
-                    // Multiple accounts
-                    let html =
-                    "✅ <strong>CUSTOMER FOUND</strong><br><br>" +
-
-                    "Customer Name: <strong>" +
-                    customer.full_name +
-                    "</strong><br>" +
-
-                    "Customer ID: <strong>" +
-                    (customer.customer_number || "-") +
-                    "</strong><br>" +
-
-                    "Mobile: <strong>" +
-                    (customer.mobile || "-") +
-                    "</strong><br><br>" +
-
-                    "<strong>Accounts:</strong><br>";
-
-                    accounts.forEach(
-                        function(acc) {
-
-                            html +=
-                            "• Account: <strong>" +
-                            acc.account_number +
-                            "</strong> | " +
-                            acc.account_type +
-                            " | Balance: ₹" +
-                            Number(
-                                acc.balance || 0
-                            ).toFixed(2) +
-                            "<br>";
-
-                        }
-                    );
-
-                    box.innerHTML = html;
-
-                    box.className =
-                    "verify-box verify-success";
-
-                    return;
-                }
-
-
-                // -----------------------------------------
-                // MULTIPLE CUSTOMER NAME MATCHES
-                // -----------------------------------------
-
-                let html =
-                    "🔎 <strong>Multiple Customers Found</strong><br><br>";
-
-                customers.forEach(
-                    function(customer) {
-
-                        html +=
-                        "<div style='padding:10px 0;" +
-                        "border-bottom:1px solid #ddd'>" +
-
-                        "<strong>" +
-                        customer.full_name +
-                        "</strong><br>" +
-
-                        "Customer ID: " +
-                        (customer.customer_number || "-") +
-
-                        "<br>" +
-
-                        "Mobile: " +
-                        (customer.mobile || "-") +
-
-                        "<br>";
-
-                        if (
-                            customer.accounts &&
-                            customer.accounts.length
-                        ) {
-
-                            customer.accounts.forEach(
-                                function(acc) {
-
-                                    html +=
-                                    "Account: <strong>" +
-                                    acc.account_number +
-                                    "</strong> | " +
-                                    acc.account_type +
-                                    " | ₹" +
-                                    Number(
-                                        acc.balance || 0
-                                    ).toFixed(2) +
-                                    "<br>";
-
-                                }
-                            );
-
-                        }
-
-                        html += "</div>";
-
-                    }
-                );
-
-
-                box.innerHTML = html;
-
-                box.className =
-                    "verify-box verify-success";
-
-            }
-
-            catch (error) {
-
-                console.error(error);
-
-                box.innerHTML =
-                "❌ Search Error: " +
-                error.message;
-
-                box.className =
-                "verify-box verify-error";
-
-            }
-
-        },
-        300
-    );
-}
-
-
-
-// =====================================================
-// SHOW CUSTOMER SEARCH RESULT
-// =====================================================
-
-function showCustomerSearchResult(
-    account,
-    customer
-) {
-
-    const box =
-        document.getElementById(
-            "customerSearchResult"
-        );
-
-    if (!customer) {
-
-        box.innerHTML =
-        "❌ Customer information not found.";
-
-        box.className =
-        "verify-box verify-error";
-
-        return;
-    }
-
-
-    box.innerHTML =
-
-    "✅ <strong>CUSTOMER VERIFIED</strong><br><br>" +
-
-    "👤 Customer Name: <strong>" +
-    (customer.full_name || "-") +
-    "</strong><br>" +
-
-    "🆔 Customer ID: <strong>" +
-    (customer.customer_number || "-") +
-    "</strong><br>" +
-
-    "🏦 Account Number: <strong>" +
-    (account.account_number || "-") +
-    "</strong><br>" +
-
-    "💳 Account Type: <strong>" +
-    (account.account_type || "-") +
-    "</strong><br>" +
-
-    "📍 Address: <strong>" +
-    (customer.address || "-") +
-    "</strong><br>" +
-
-    "📱 Mobile: <strong>" +
-    (customer.mobile || "-") +
-    "</strong><br>" +
-
-    "✉️ Email: <strong>" +
-    (customer.email || "-") +
-    "</strong><br>" +
-
-    "🪪 Aadhaar: <strong>" +
-    maskAadhaar(customer.aadhaar_number) +
-    "</strong><br>" +
-
-    "PAN: <strong>" +
-    (customer.pan_number || "-") +
-    "</strong><br>" +
-
-    "💰 Current Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
-
-    box.className =
-        "verify-box verify-success";
-}
-
-
-
-// =====================================================
-// MASK AADHAAR
-// =====================================================
-
-function maskAadhaar(aadhaar) {
-
-    if (!aadhaar) return "-";
-
-    const value =
-        String(aadhaar);
-
-    if (value.length === 12) {
-
-        return "XXXX-XXXX-" +
-            value.substring(8);
-    }
-
-    return "XXXX";
-}
 loadTransactions();
+
 
 </script>
 
