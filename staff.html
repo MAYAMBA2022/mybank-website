@@ -1,1228 +1,2662 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>MyBank Staff Panel</title>
+<meta charset="UTF-8">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+<title>MyBank - Staff Panel</title>
 
-    body {
-      background: #f1f5f9;
-      min-height: 100vh;
-      color: #0f172a;
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    .header {
-      background: #2563eb;
-      color: white;
-      padding: 18px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
+<style>
 
-    .header h2 {
-      font-size: 24px;
-    }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
 
-    .logout {
-      padding: 10px 18px;
-      background: white;
-      color: #2563eb;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+body {
+    background: #f1f5f9;
+    min-height: 100vh;
+}
 
-    .container {
-      max-width: 1100px;
-      margin: 25px auto;
-      padding: 15px;
-    }
+.header {
+    background: #2563eb;
+    color: white;
+    padding: 18px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .welcome {
-      margin-bottom: 20px;
-    }
+.header h2 {
+    font-size: 24px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
+.logout {
+    width: auto;
+    padding: 10px 18px;
+    background: white;
+    color: #2563eb;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: bold;
+}
 
-    .card {
-      background: white;
-      padding: 22px;
-      border-radius: 12px;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
-    }
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 20px;
+}
 
-    .card h3 {
-      margin-bottom: 15px;
-      color: #1e293b;
-    }
+.welcome {
+    margin-bottom: 25px;
+}
 
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 7px;
-      font-size: 15px;
-    }
+.grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
 
-    button {
-      padding: 11px 17px;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
 
-    .blue {
-      background: #2563eb;
-      color: white;
-    }
+    box-shadow:
+        0 5px 18px rgba(0,0,0,0.08);
+}
 
-    .green {
-      background: #16a34a;
-      color: white;
-    }
+.card h3 {
+    margin-bottom: 18px;
+    color: #1e293b;
+}
 
-    .red {
-      background: #dc2626;
-      color: white;
-    }
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
 
-    .orange {
-      background: #ea580c;
-      color: white;
-    }
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
 
-    .message {
-      margin-top: 12px;
-      font-weight: bold;
-    }
+    font-size: 15px;
+}
 
-    .account-result {
-      margin-top: 15px;
-      padding: 15px;
-      background: #f8fafc;
-      border-radius: 8px;
-      display: none;
-    }
+button {
+    width: 100%;
+    padding: 12px;
 
-    .transactions {
-      margin-top: 25px;
-      background: white;
-      padding: 22px;
-      border-radius: 12px;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
-      overflow-x: auto;
-    }
+    border: none;
+    border-radius: 7px;
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-      min-width: 650px;
-    }
+    font-size: 15px;
+    font-weight: bold;
 
-    th,
-    td {
-      padding: 11px;
-      border-bottom: 1px solid #e2e8f0;
-      text-align: left;
-    }
+    cursor: pointer;
+}
 
-    th {
-      background: #f8fafc;
-    }
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-    .credit {
-      color: green;
-      font-weight: bold;
-    }
+.blue {
+    background: #2563eb;
+    color: white;
+}
 
-    .debit {
-      color: red;
-      font-weight: bold;
-    }
+.green {
+    background: #16a34a;
+    color: white;
+}
 
-    @media(max-width:600px) {
-      .header {
-        padding: 15px;
-      }
+.red {
+    background: #dc2626;
+    color: white;
+}
 
-      .container {
-        padding: 10px;
-      }
-    }
-  </style>
+.orange {
+    background: #ea580c;
+    color: white;
+}
+
+.verify-btn {
+    background: #475569;
+    color: white;
+    margin-bottom: 12px;
+}
+
+.verify-box {
+    display: none;
+
+    background: #f8fafc;
+
+    border: 1px solid #cbd5e1;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
+    margin-bottom: 15px;
+
+    line-height: 1.8;
+}
+
+.verify-success {
+    border-left: 5px solid #16a34a;
+}
+
+.verify-error {
+    border-left: 5px solid #dc2626;
+    color: red;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.small {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.result {
+    margin-top: 15px;
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border-radius: 7px;
+
+    line-height: 1.7;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th,
+td {
+    padding: 12px;
+
+    border-bottom:
+        1px solid #e2e8f0;
+
+    text-align: left;
+}
+
+th {
+    background: #f8fafc;
+}
+
+.credit {
+    color: green;
+    font-weight: bold;
+}
+
+.debit {
+    color: red;
+    font-weight: bold;
+}
+
+.auto-status {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: -5px;
+    margin-bottom: 10px;
+}
+
+</style>
+
 </head>
 
 <body>
 
-  <!-- HEADER -->
+<!-- HEADER -->
 
-  <div class="header">
+<div class="header">
 
-    <h2>MyBank - Staff</h2>
+    <h2>MyBank - Staff Panel</h2>
 
     <button
-      class="logout"
-      id="logoutBtn">
-      Logout
+        class="logout"
+        id="logoutBtn">
+
+        Logout
+
     </button>
 
-  </div>
+</div>
 
 
-  <div class="container">
+<div class="container">
 
-    <!-- WELCOME -->
+<div class="welcome">
 
-    <div class="welcome">
+    <h2>Banking Operations</h2>
 
-      <h2>
-        Staff Banking Panel 👨‍💼
-      </h2>
+    <p class="small">
+        Customer Management • Deposit • Withdrawal • Transfer
+    </p>
 
-      <p>
-        Customer accounts, cash transactions and banking operations
-      </p>
-
-    </div>
+</div>
 
 
-    <!-- MAIN GRID -->
-
-    <div class="grid">
+<div class="grid">
 
 
-      <!-- CUSTOMER SEARCH -->
+<!-- =====================================================
+     CREATE CUSTOMER
+===================================================== -->
 
-      <div class="card">
+<div class="card">
 
-        <h3>🔎 Customer / Account Search</h3>
+    <h3>👤 Create Customer & Account</h3>
 
-        <input
-          type="text"
-          id="searchAccount"
-          placeholder="Enter Account Number">
+    <input
+        type="text"
+        id="newCustomerName"
+        placeholder="Customer Full Name">
 
-        <button
-          class="blue"
-          onclick="searchAccount()">
-          Search Account
-        </button>
+    <input
+        type="text"
+        id="newCustomerAddress"
+        placeholder="Address">
 
-        <div
-          id="accountResult"
-          class="account-result">
-        </div>
+    <input
+        type="text"
+        id="newCustomerAadhaar"
+        placeholder="Aadhaar Number"
+        maxlength="12"
+        inputmode="numeric">
 
-      </div>
+    <input
+        type="text"
+        id="newCustomerPan"
+        placeholder="PAN Number"
+        maxlength="10"
+        style="text-transform:uppercase">
 
+    <input
+        type="text"
+        id="newCustomerMobile"
+        placeholder="Mobile Number"
+        maxlength="10"
+        inputmode="numeric">
 
-      <!-- CASH DEPOSIT -->
+    <input
+        type="email"
+        id="newCustomerEmail"
+        placeholder="Email">
 
-      <div class="card">
+    <input
+        type="file"
+        id="newCustomerPhoto"
+        accept="image/*">
 
-        <h3>💰 Cash Deposit</h3>
+    <select id="accountTypeSelect">
 
-        <input
-          type="text"
-          id="depositAccount"
-          placeholder="Account Number">
-
-        <input
-          type="number"
-          id="depositAmount"
-          placeholder="Amount"
-          min="1">
-
-        <input
-          type="text"
-          id="depositDescription"
-          placeholder="Description"
-          value="Cash Deposit">
-
-        <button
-          class="green"
-          onclick="depositMoney()">
-          Deposit Money
-        </button>
-
-        <div
-          id="depositMessage"
-          class="message">
-        </div>
-
-      </div>
-
-
-      <!-- CASH WITHDRAWAL -->
-
-      <div class="card">
-
-        <h3>💵 Cash Withdrawal</h3>
-
-        <input
-          type="text"
-          id="withdrawAccount"
-          placeholder="Account Number">
-
-        <input
-          type="number"
-          id="withdrawAmount"
-          placeholder="Amount"
-          min="1">
-
-        <input
-          type="text"
-          id="withdrawDescription"
-          placeholder="Description"
-          value="Cash Withdrawal">
-
-        <button
-          class="red"
-          onclick="withdrawMoney()">
-          Withdraw Money
-        </button>
-
-        <div
-          id="withdrawMessage"
-          class="message">
-        </div>
-
-      </div>
-
-
-      <!-- ACCOUNT TYPE -->
-
-      <div class="card">
-
-        <h3>🏦 Account Type</h3>
-
-        <select id="accountTypeSelect">
-
-          <option value="SAVINGS">
+        <option value="SAVINGS">
             Savings Account
-          </option>
+        </option>
 
-          <option value="CURRENT">
+        <option value="CURRENT">
             Current Account
-          </option>
+        </option>
 
-        </select>
+    </select>
 
-        <input
-          type="text"
-          id="newAccountCustomer"
-          placeholder="Customer ID">
+    <button
+        class="blue"
+        onclick="createCustomerAndAccount()">
 
-        <input
-          type="text"
-          id="newAccountNumber"
-          placeholder="Account Number">
+        Create Customer & Account
 
-        <button
-          class="blue"
-          onclick="createAccount()">
-          Create Account
-        </button>
+    </button>
 
-        <div
-          id="accountCreateMessage"
-          class="message">
-        </div>
-
-      </div>
-
-
-      <!-- MONEY TRANSFER -->
-
-      <div class="card">
-
-        <h3>🔄 Money Transfer</h3>
-
-        <input
-          type="text"
-          id="transferFrom"
-          placeholder="From Account Number">
-
-        <input
-          type="text"
-          id="transferTo"
-          placeholder="To Account Number">
-
-        <input
-          type="number"
-          id="transferAmount"
-          placeholder="Amount"
-          min="1">
-
-        <input
-          type="text"
-          id="transferDescription"
-          placeholder="Description"
-          value="Account Transfer">
-
-        <button
-          class="orange"
-          onclick="transferMoney()">
-          Transfer
-        </button>
-
-        <div
-          id="transferMessage"
-          class="message">
-        </div>
-
-      </div>
-
+    <div
+        id="accountCreateMessage"
+        class="result">
 
     </div>
 
+</div>
 
-    <!-- TRANSACTIONS -->
 
-    <div class="transactions">
 
-      <h2>🧾 Recent Transactions</h2>
+<!-- =====================================================
+     DEPOSIT
+===================================================== -->
 
-      <table>
+<div class="card">
+
+    <h3>💰 Cash Deposit</h3>
+
+    <input
+        type="text"
+        id="depositAccount"
+        placeholder="Enter Account Number"
+        oninput="handleDepositInput()">
+
+    <div
+        id="depositAutoStatus"
+        class="auto-status">
+    </div>
+
+    <button
+        class="verify-btn"
+        onclick="verifyDepositAccount()">
+
+        🔍 Verify Account
+
+    </button>
+
+    <div
+        id="depositVerifyBox"
+        class="verify-box">
+    </div>
+
+    <input
+        type="number"
+        id="depositAmount"
+        placeholder="Enter Deposit Amount"
+        min="1">
+
+    <input
+        type="text"
+        id="depositDescription"
+        placeholder="Description">
+
+    <button
+        class="green"
+        id="depositBtn"
+        onclick="depositMoney()">
+
+        Deposit Money
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     WITHDRAWAL
+===================================================== -->
+
+<div class="card">
+
+    <h3>💵 Cash Withdrawal</h3>
+
+    <input
+        type="text"
+        id="withdrawAccount"
+        placeholder="Enter Account Number"
+        oninput="handleWithdrawInput()">
+
+    <div
+        id="withdrawAutoStatus"
+        class="auto-status">
+    </div>
+
+    <button
+        class="verify-btn"
+        onclick="verifyWithdrawAccount()">
+
+        🔍 Verify Account
+
+    </button>
+
+    <div
+        id="withdrawVerifyBox"
+        class="verify-box">
+    </div>
+
+    <input
+        type="number"
+        id="withdrawAmount"
+        placeholder="Enter Withdrawal Amount"
+        min="1">
+
+    <input
+        type="text"
+        id="withdrawDescription"
+        placeholder="Description">
+
+    <button
+        class="red"
+        id="withdrawBtn"
+        onclick="withdrawMoney()">
+
+        Withdraw Money
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     TRANSFER
+===================================================== -->
+
+<div class="card">
+
+    <h3>🔄 Money Transfer</h3>
+
+    <input
+        type="text"
+        id="fromAccount"
+        placeholder="From Account Number"
+        oninput="handleFromAccountInput()">
+
+    <div
+        id="fromAutoStatus"
+        class="auto-status">
+    </div>
+
+    <div
+        id="fromVerifyBox"
+        class="verify-box">
+    </div>
+
+    <input
+        type="text"
+        id="toAccount"
+        placeholder="To Account Number"
+        oninput="handleToAccountInput()">
+
+    <div
+        id="toAutoStatus"
+        class="auto-status">
+    </div>
+
+    <div
+        id="toVerifyBox"
+        class="verify-box">
+    </div>
+
+    <button
+        class="verify-btn"
+        onclick="verifyTransferAccounts()">
+
+        🔍 Verify Both Accounts
+
+    </button>
+
+    <input
+        type="number"
+        id="transferAmount"
+        placeholder="Transfer Amount"
+        min="1">
+
+    <input
+        type="text"
+        id="transferDescription"
+        placeholder="Description">
+
+    <button
+        class="orange"
+        onclick="transferMoney()">
+
+        Transfer Money
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     TRANSACTION HISTORY
+===================================================== -->
+
+<div class="card full">
+
+    <h3>📋 Recent Transactions</h3>
+
+    <table>
 
         <thead>
 
-          <tr>
+            <tr>
 
-            <th>Account</th>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Description</th>
-            <th>Reference</th>
-            <th>Status</th>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Date</th>
 
-          </tr>
+            </tr>
 
         </thead>
 
-        <tbody id="staffTransactionList">
+        <tbody id="transactionList">
+
+            <tr>
+
+                <td colspan="6">
+                    Loading...
+                </td>
+
+            </tr>
 
         </tbody>
 
-      </table>
+    </table>
 
-    </div>
+</div>
 
 
-  </div>
+</div>
 
+</div>
 
-  <script>
 
-    // ==========================================
-    // SUPABASE CONFIGURATION
-    // ==========================================
+<script>
 
-    const SUPABASE_URL =
-      "https://ncihofyhnpxrftilejij.supabase.co";
 
-    const SUPABASE_ANON_KEY =
-      "sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
+// =====================================================
+// SUPABASE CONFIGURATION
+// =====================================================
 
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
+const SUPABASE_URL =
+"https://ncihofyhnpxrftilejij.supabase.co";
 
+const SUPABASE_ANON_KEY =
+"sb_publishable_FDd8fKnlcN8RBqSqovQlIQ_-cx_tZwi";
 
-    // ==========================================
-    // SEARCH ACCOUNT
-    // ==========================================
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
-    async function searchAccount() {
 
-      const accountNumber =
-        document
-          .getElementById("searchAccount")
-          .value
-          .trim();
+// =====================================================
+// VERIFIED ACCOUNT VARIABLES
+// =====================================================
 
-      const result =
-        document.getElementById("accountResult");
+let verifiedDepositAccount = null;
 
-      result.style.display = "block";
+let verifiedWithdrawAccount = null;
 
-      if (!accountNumber) {
+let verifiedFromAccount = null;
 
-        result.innerHTML =
-          "Please enter account number.";
+let verifiedToAccount = null;
 
-        return;
-      }
 
-      const { data: account, error } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("account_number", accountNumber)
-          .single();
+// =====================================================
+// CUSTOMER CREATE
+// =====================================================
 
-      if (error || !account) {
+async function createCustomerAndAccount() {
 
-        result.innerHTML =
-          "❌ Account not found.";
-
-        return;
-      }
-
-      result.innerHTML = `
-        <strong>Account Number:</strong>
-        ${account.account_number}
-        <br><br>
-
-        <strong>Account Type:</strong>
-        ${account.account_type}
-        <br><br>
-
-        <strong>Balance:</strong>
-        ₹${Number(account.balance || 0).toFixed(2)}
-      `;
-
-    }
-
-
-    // ==========================================
-    // DEPOSIT MONEY
-    // ==========================================
-
-    async function depositMoney() {
-
-      const accountNumber =
-        document
-          .getElementById("depositAccount")
-          .value
-          .trim();
-
-      const amount =
-        Number(
-          document.getElementById("depositAmount").value
-        );
-
-      const description =
-        document
-          .getElementById("depositDescription")
-          .value
-          .trim() || "Cash Deposit";
-
-      const message =
-        document.getElementById("depositMessage");
-
-      message.innerText = "";
-
-      if (!accountNumber) {
-
-        message.innerText =
-          "Please enter account number.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      if (!amount || amount <= 0) {
-
-        message.innerText =
-          "Please enter valid amount.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const { data: account, error: accountError } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("account_number", accountNumber)
-          .single();
-
-      if (accountError || !account) {
-
-        message.innerText =
-          "Account not found.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const newBalance =
-        Number(account.balance || 0) + amount;
-
-      const { error: updateError } =
-        await supabaseClient
-          .from("accounts")
-          .update({
-            balance: newBalance
-          })
-          .eq("id", account.id);
-
-      if (updateError) {
-
-        console.error(updateError);
-
-        message.innerText =
-          "Balance update failed.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const { error: transactionError } =
-        await supabaseClient
-          .from("transactions")
-          .insert({
-
-            account_id: account.id,
-
-            transaction_type: "CREDIT",
-
-            amount: amount,
-
-            description: description,
-
-            reference_number:
-              "DEP-" + Date.now(),
-
-            status: "SUCCESS"
-
-          });
-
-      if (transactionError) {
-
-        console.error(transactionError);
-
-        message.innerText =
-          "Transaction save failed.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      message.innerText =
-        "✅ Deposit Successful | New Balance: ₹" +
-        newBalance.toFixed(2);
-
-      message.style.color = "green";
-
-      document.getElementById(
-        "depositAmount"
-      ).value = "";
-
-      loadStaffTransactions();
-
-    }
-
-
-    // ==========================================
-    // WITHDRAW MONEY
-    // ==========================================
-
-    async function withdrawMoney() {
-
-      const accountNumber =
-        document
-          .getElementById("withdrawAccount")
-          .value
-          .trim();
-
-      const amount =
-        Number(
-          document.getElementById("withdrawAmount").value
-        );
-
-      const description =
-        document
-          .getElementById("withdrawDescription")
-          .value
-          .trim() || "Cash Withdrawal";
-
-      const message =
-        document.getElementById("withdrawMessage");
-
-      message.innerText = "";
-
-      if (!accountNumber) {
-
-        message.innerText =
-          "Please enter account number.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      if (!amount || amount <= 0) {
-
-        message.innerText =
-          "Please enter valid amount.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const { data: account, error: accountError } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("account_number", accountNumber)
-          .single();
-
-      if (accountError || !account) {
-
-        message.innerText =
-          "Account not found.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const currentBalance =
-        Number(account.balance || 0);
-
-      if (currentBalance < amount) {
-
-        message.innerText =
-          "❌ Insufficient Balance. Available: ₹" +
-          currentBalance.toFixed(2);
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const newBalance =
-        currentBalance - amount;
-
-      const { error: updateError } =
-        await supabaseClient
-          .from("accounts")
-          .update({
-            balance: newBalance
-          })
-          .eq("id", account.id);
-
-      if (updateError) {
-
-        console.error(updateError);
-
-        message.innerText =
-          "Balance update failed.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      const { error: transactionError } =
-        await supabaseClient
-          .from("transactions")
-          .insert({
-
-            account_id: account.id,
-
-            transaction_type: "DEBIT",
-
-            amount: amount,
-
-            description: description,
-
-            reference_number:
-              "WDL-" + Date.now(),
-
-            status: "SUCCESS"
-
-          });
-
-      if (transactionError) {
-
-        console.error(transactionError);
-
-        message.innerText =
-          "Transaction save failed.";
-
-        message.style.color = "red";
-
-        return;
-      }
-
-      message.innerText =
-        "✅ Withdrawal Successful | Remaining Balance: ₹" +
-        newBalance.toFixed(2);
-
-      message.style.color = "green";
-
-      document.getElementById(
-        "withdrawAmount"
-      ).value = "";
-
-      loadStaffTransactions();
-
-    }
-
-
-    // ==========================================
-    // CREATE ACCOUNT
-    // ==========================================
-
-    async function createAccount() {
-
-      const customerId =
-        document
-          .getElementById("newAccountCustomer")
-          .value
-          .trim();
-
-      const accountNumber =
-        document
-          .getElementById("newAccountNumber")
-          .value
-          .trim();
-
-      const accountType =
-        document
-          .getElementById("accountTypeSelect")
-          .value;
-
-      const message =
+    const name =
         document.getElementById(
-          "accountCreateMessage"
+            "newCustomerName"
+        ).value.trim();
+
+    const address =
+        document.getElementById(
+            "newCustomerAddress"
+        ).value.trim();
+
+    const aadhaar =
+        document.getElementById(
+            "newCustomerAadhaar"
+        ).value.trim();
+
+    const pan =
+        document.getElementById(
+            "newCustomerPan"
+        ).value.trim().toUpperCase();
+
+    const mobile =
+        document.getElementById(
+            "newCustomerMobile"
+        ).value.trim();
+
+    const email =
+        document.getElementById(
+            "newCustomerEmail"
+        ).value.trim();
+
+    const accountType =
+        document.getElementById(
+            "accountTypeSelect"
+        ).value;
+
+    const message =
+        document.getElementById(
+            "accountCreateMessage"
         );
 
-      if (!customerId || !accountNumber) {
 
-        message.innerText =
-          "Customer ID and Account Number are required.";
+    if (!name) {
 
-        message.style.color = "red";
+        message.innerHTML =
+        "❌ Customer name required.";
+
+        message.className =
+        "result error";
 
         return;
-      }
+    }
 
-      const { data, error } =
+
+    if (!address) {
+
+        message.innerHTML =
+        "❌ Address required.";
+
+        message.className =
+        "result error";
+
+        return;
+    }
+
+
+    if (!/^\d{12}$/.test(aadhaar)) {
+
+        message.innerHTML =
+        "❌ Aadhaar must contain 12 digits.";
+
+        message.className =
+        "result error";
+
+        return;
+    }
+
+
+    if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(pan)) {
+
+        message.innerHTML =
+        "❌ Invalid PAN number.";
+
+        message.className =
+        "result error";
+
+        return;
+    }
+
+
+    if (
+        mobile &&
+        !/^\d{10}$/.test(mobile)
+    ) {
+
+        message.innerHTML =
+        "❌ Mobile must contain 10 digits.";
+
+        message.className =
+        "result error";
+
+        return;
+    }
+
+
+    message.innerHTML =
+    "Creating Customer & Account...";
+
+    message.className =
+    "result";
+
+
+    try {
+
+        // CUSTOMER CREATE
+        // Customer ID automatic from database
+
+        const {
+            data: customer,
+            error: customerError
+        } =
         await supabaseClient
-          .from("accounts")
-          .insert({
+        .from("customers")
+        .insert({
 
-            customer_id: customerId,
+            full_name: name,
 
-            account_number: accountNumber,
+            address: address,
 
-            account_type: accountType,
+            aadhaar_number: aadhaar,
+
+            pan_number: pan,
+
+            mobile:
+                mobile || null,
+
+            email:
+                email || null
+
+        })
+        .select(
+            "id, customer_number, full_name"
+        )
+        .single();
+
+
+        if (customerError) {
+
+            message.innerHTML =
+            "❌ Customer creation failed:<br>" +
+            customerError.message;
+
+            message.className =
+            "result error";
+
+            return;
+        }
+
+
+        // ACCOUNT CREATE
+        // Account Number automatic from database
+
+        const {
+            data: account,
+            error: accountError
+        } =
+        await supabaseClient
+        .from("accounts")
+        .insert({
+
+            customer_id:
+                customer.id,
+
+            account_type:
+                accountType,
 
             balance: 0
 
-          })
-          .select()
-          .single();
+        })
+        .select(
+            "account_number, account_type, balance"
+        )
+        .single();
 
-      if (error) {
+
+        if (accountError) {
+
+            message.innerHTML =
+            "❌ Account creation failed:<br>" +
+            accountError.message;
+
+            message.className =
+            "result error";
+
+            return;
+        }
+
+
+        message.innerHTML =
+
+        "✅ Customer Created Successfully!<br><br>" +
+
+        "Customer ID: <strong>" +
+        customer.customer_number +
+        "</strong><br>" +
+
+        "Account Number: <strong>" +
+        account.account_number +
+        "</strong><br>" +
+
+        "Account Type: <strong>" +
+        account.account_type +
+        "</strong><br>" +
+
+        "Opening Balance: <strong>₹0.00</strong>";
+
+
+        message.className =
+        "result success";
+
+
+        // CLEAR FORM
+
+        document.getElementById(
+            "newCustomerName"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerAddress"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerAadhaar"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerPan"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerMobile"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerEmail"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerPhoto"
+        ).value = "";
+
+    }
+
+    catch (error) {
 
         console.error(error);
 
-        message.innerText =
-          "Account creation failed: " +
-          error.message;
+        message.innerHTML =
+        "❌ Error: " +
+        error.message;
 
-        message.style.color = "red";
+        message.className =
+        "result error";
 
-        return;
-      }
+    }
 
-      message.innerText =
-        "✅ Account created successfully.";
+}
 
-      message.style.color = "green";
 
-      console.log("New Account:", data);
+
+// =====================================================
+// COMMON ACCOUNT VERIFICATION
+// =====================================================
+
+async function getAccountDetails(accountNumber) {
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+    .from("accounts")
+    .select(`
+        id,
+        account_number,
+        account_type,
+        balance,
+        customers (
+            customer_number,
+            full_name,
+            mobile
+        )
+    `)
+    .eq(
+        "account_number",
+        accountNumber
+    )
+    .maybeSingle();
+
+
+    if (error) {
+
+        console.error(error);
+
+        return {
+            account: null,
+            error: error.message
+        };
 
     }
 
 
-    // ==========================================
-    // TRANSFER MONEY
-    // ==========================================
+    if (!data) {
 
-    async function transferMoney() {
+        return {
+            account: null,
+            error: "Account Not Found"
+        };
 
-      const fromAccount =
-        document
-          .getElementById("transferFrom")
-          .value
-          .trim();
+    }
 
-      const toAccount =
-        document
-          .getElementById("transferTo")
-          .value
-          .trim();
 
-      const amount =
-        Number(
-          document.getElementById("transferAmount").value
-        );
+    return {
+        account: data,
+        error: null
+    };
 
-      const description =
-        document
-          .getElementById("transferDescription")
-          .value
-          .trim() || "Account Transfer";
+}
 
-      const message =
+
+
+// =====================================================
+// DEPOSIT INPUT
+// =====================================================
+
+let depositTimer = null;
+
+
+function handleDepositInput() {
+
+    clearDepositVerification();
+
+    clearTimeout(depositTimer);
+
+
+    const accountNumber =
         document.getElementById(
-          "transferMessage"
+            "depositAccount"
+        ).value.trim();
+
+
+    if (!accountNumber) return;
+
+
+    document.getElementById(
+        "depositAutoStatus"
+    ).innerHTML =
+    "🔄 Verifying account...";
+
+
+    depositTimer =
+    setTimeout(
+        function() {
+
+            verifyDepositAccount();
+
+        },
+        400
+    );
+
+}
+
+
+
+// =====================================================
+// DEPOSIT VERIFY
+// =====================================================
+
+async function verifyDepositAccount() {
+
+    const accountNumber =
+        document.getElementById(
+            "depositAccount"
+        ).value.trim();
+
+    const box =
+        document.getElementById(
+            "depositVerifyBox"
         );
 
-      message.innerText = "";
+    const status =
+        document.getElementById(
+            "depositAutoStatus"
+        );
 
-      if (!fromAccount || !toAccount) {
 
-        message.innerText =
-          "Both account numbers are required.";
+    verifiedDepositAccount = null;
 
-        message.style.color = "red";
+    box.style.display = "block";
 
-        return;
-      }
 
-      if (fromAccount === toAccount) {
+    if (!accountNumber) {
 
-        message.innerText =
-          "Sender and receiver cannot be same.";
+        status.innerHTML = "";
 
-        message.style.color = "red";
+        box.innerHTML =
+        "❌ Please enter Account Number.";
 
-        return;
-      }
-
-      if (!amount || amount <= 0) {
-
-        message.innerText =
-          "Please enter valid amount.";
-
-        message.style.color = "red";
+        box.className =
+        "verify-box verify-error";
 
         return;
-      }
+    }
 
-      const { data: sender, error: senderError } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("account_number", fromAccount)
-          .single();
 
-      if (senderError || !sender) {
+    status.innerHTML =
+    "🔄 Verifying...";
 
-        message.innerText =
-          "Sender account not found.";
 
-        message.style.color = "red";
+    const result =
+        await getAccountDetails(
+            accountNumber
+        );
 
-        return;
-      }
 
-      const senderBalance =
-        Number(sender.balance || 0);
+    if (
+        result.error ||
+        !result.account
+    ) {
 
-      if (senderBalance < amount) {
+        status.innerHTML =
+        "❌ Account not found";
 
-        message.innerText =
-          "Insufficient sender balance.";
+        box.innerHTML =
+        "❌ Account Not Found.";
 
-        message.style.color = "red";
+        box.className =
+        "verify-box verify-error";
 
         return;
-      }
+    }
 
-      const { data: receiver, error: receiverError } =
-        await supabaseClient
-          .from("accounts")
-          .select("*")
-          .eq("account_number", toAccount)
-          .single();
 
-      if (receiverError || !receiver) {
+    const account =
+        result.account;
 
-        message.innerText =
-          "Receiver account not found.";
 
-        message.style.color = "red";
+    verifiedDepositAccount =
+        account;
+
+
+    status.innerHTML =
+    "✅ Account Verified";
+
+
+    box.innerHTML =
+
+    "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
+
+    "Customer Name: <strong>" +
+    (account.customers?.full_name || "-") +
+    "</strong><br>" +
+
+    "Customer ID: <strong>" +
+    (account.customers?.customer_number || "-") +
+    "</strong><br>" +
+
+    "Account Number: <strong>" +
+    account.account_number +
+    "</strong><br>" +
+
+    "Account Type: <strong>" +
+    account.account_type +
+    "</strong><br>" +
+
+    "Previous Balance: <strong>₹" +
+    Number(account.balance || 0).toFixed(2) +
+    "</strong>";
+
+
+    box.className =
+    "verify-box verify-success";
+
+}
+
+
+
+// =====================================================
+// CLEAR DEPOSIT
+// =====================================================
+
+function clearDepositVerification() {
+
+    verifiedDepositAccount = null;
+
+    const box =
+        document.getElementById(
+            "depositVerifyBox"
+        );
+
+    const status =
+        document.getElementById(
+            "depositAutoStatus"
+        );
+
+
+    if (box) {
+
+        box.style.display = "none";
+
+        box.innerHTML = "";
+
+    }
+
+
+    if (status) {
+
+        status.innerHTML = "";
+
+    }
+
+}
+
+
+
+// =====================================================
+// DEPOSIT MONEY
+// =====================================================
+
+async function depositMoney() {
+
+    if (!verifiedDepositAccount) {
+
+        alert(
+            "Please verify the Account Number first."
+        );
 
         return;
-      }
+    }
 
-      const newSenderBalance =
+
+    const accountNumber =
+        document.getElementById(
+            "depositAccount"
+        ).value.trim();
+
+
+    const amount =
+        Number(
+            document.getElementById(
+                "depositAmount"
+            ).value
+        );
+
+
+    const description =
+        document.getElementById(
+            "depositDescription"
+        ).value.trim()
+        || "Cash Deposit";
+
+
+    if (
+        accountNumber !==
+        verifiedDepositAccount.account_number
+    ) {
+
+        alert(
+            "Account changed. Please verify again."
+        );
+
+        clearDepositVerification();
+
+        return;
+    }
+
+
+    if (!amount || amount <= 0) {
+
+        alert(
+            "Please enter valid amount."
+        );
+
+        return;
+    }
+
+
+    const currentBalance =
+        Number(
+            verifiedDepositAccount.balance || 0
+        );
+
+
+    const newBalance =
+        currentBalance + amount;
+
+
+    const {
+        error: updateError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .update({
+
+        balance: newBalance
+
+    })
+    .eq(
+        "id",
+        verifiedDepositAccount.id
+    );
+
+
+    if (updateError) {
+
+        alert(
+            "Deposit failed: " +
+            updateError.message
+        );
+
+        return;
+    }
+
+
+    const {
+        error: transactionError
+    } =
+    await supabaseClient
+    .from("transactions")
+    .insert({
+
+        account_id:
+            verifiedDepositAccount.id,
+
+        transaction_type:
+            "CREDIT",
+
+        amount:
+            amount,
+
+        description:
+            description,
+
+        reference_number:
+            "DEP-" + Date.now(),
+
+        status:
+            "SUCCESS"
+
+    });
+
+
+    if (transactionError) {
+
+        alert(
+            "Transaction save failed: " +
+            transactionError.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Deposit Successful!\n\n" +
+
+        "Customer: " +
+        (verifiedDepositAccount.customers?.full_name || "-") +
+
+        "\nAccount: " +
+        accountNumber +
+
+        "\nPrevious Balance: ₹" +
+        currentBalance.toFixed(2) +
+
+        "\nDeposit: ₹" +
+        amount.toFixed(2) +
+
+        "\nNew Balance: ₹" +
+        newBalance.toFixed(2)
+    );
+
+
+    document.getElementById(
+        "depositAccount"
+    ).value = "";
+
+    document.getElementById(
+        "depositAmount"
+    ).value = "";
+
+    document.getElementById(
+        "depositDescription"
+    ).value = "";
+
+
+    clearDepositVerification();
+
+    loadTransactions();
+
+}
+
+
+
+// =====================================================
+// WITHDRAW INPUT
+// =====================================================
+
+let withdrawTimer = null;
+
+
+function handleWithdrawInput() {
+
+    clearWithdrawVerification();
+
+    clearTimeout(withdrawTimer);
+
+
+    const accountNumber =
+        document.getElementById(
+            "withdrawAccount"
+        ).value.trim();
+
+
+    if (!accountNumber) return;
+
+
+    document.getElementById(
+        "withdrawAutoStatus"
+    ).innerHTML =
+    "🔄 Verifying account...";
+
+
+    withdrawTimer =
+    setTimeout(
+        function() {
+
+            verifyWithdrawAccount();
+
+        },
+        400
+    );
+
+}
+
+
+
+// =====================================================
+// WITHDRAW VERIFY
+// =====================================================
+
+async function verifyWithdrawAccount() {
+
+    const accountNumber =
+        document.getElementById(
+            "withdrawAccount"
+        ).value.trim();
+
+    const box =
+        document.getElementById(
+            "withdrawVerifyBox"
+        );
+
+    const status =
+        document.getElementById(
+            "withdrawAutoStatus"
+        );
+
+
+    verifiedWithdrawAccount = null;
+
+    box.style.display = "block";
+
+
+    if (!accountNumber) {
+
+        status.innerHTML = "";
+
+        box.innerHTML =
+        "❌ Please enter Account Number.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
+
+    status.innerHTML =
+    "🔄 Verifying...";
+
+
+    const result =
+        await getAccountDetails(
+            accountNumber
+        );
+
+
+    if (
+        result.error ||
+        !result.account
+    ) {
+
+        status.innerHTML =
+        "❌ Account not found";
+
+        box.innerHTML =
+        "❌ Account Not Found.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
+
+    const account =
+        result.account;
+
+
+    verifiedWithdrawAccount =
+        account;
+
+
+    status.innerHTML =
+    "✅ Account Verified";
+
+
+    box.innerHTML =
+
+    "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
+
+    "Customer Name: <strong>" +
+    (account.customers?.full_name || "-") +
+    "</strong><br>" +
+
+    "Customer ID: <strong>" +
+    (account.customers?.customer_number || "-") +
+    "</strong><br>" +
+
+    "Account Number: <strong>" +
+    account.account_number +
+    "</strong><br>" +
+
+    "Account Type: <strong>" +
+    account.account_type +
+    "</strong><br>" +
+
+    "Previous Balance: <strong>₹" +
+    Number(account.balance || 0).toFixed(2) +
+    "</strong>";
+
+
+    box.className =
+    "verify-box verify-success";
+
+}
+
+
+
+// =====================================================
+// CLEAR WITHDRAW
+// =====================================================
+
+function clearWithdrawVerification() {
+
+    verifiedWithdrawAccount = null;
+
+    const box =
+        document.getElementById(
+            "withdrawVerifyBox"
+        );
+
+    const status =
+        document.getElementById(
+            "withdrawAutoStatus"
+        );
+
+
+    if (box) {
+
+        box.style.display = "none";
+
+        box.innerHTML = "";
+
+    }
+
+
+    if (status) {
+
+        status.innerHTML = "";
+
+    }
+
+}
+
+
+
+// =====================================================
+// WITHDRAW MONEY
+// =====================================================
+
+async function withdrawMoney() {
+
+    if (!verifiedWithdrawAccount) {
+
+        alert(
+            "Please verify the Account Number first."
+        );
+
+        return;
+    }
+
+
+    const accountNumber =
+        document.getElementById(
+            "withdrawAccount"
+        ).value.trim();
+
+
+    const amount =
+        Number(
+            document.getElementById(
+                "withdrawAmount"
+            ).value
+        );
+
+
+    const description =
+        document.getElementById(
+            "withdrawDescription"
+        ).value.trim()
+        || "Cash Withdrawal";
+
+
+    if (
+        accountNumber !==
+        verifiedWithdrawAccount.account_number
+    ) {
+
+        alert(
+            "Account changed. Please verify again."
+        );
+
+        clearWithdrawVerification();
+
+        return;
+    }
+
+
+    if (!amount || amount <= 0) {
+
+        alert(
+            "Please enter valid amount."
+        );
+
+        return;
+    }
+
+
+    const currentBalance =
+        Number(
+            verifiedWithdrawAccount.balance || 0
+        );
+
+
+    if (currentBalance < amount) {
+
+        alert(
+            "Insufficient Balance!\n\n" +
+
+            "Customer: " +
+            (verifiedWithdrawAccount.customers?.full_name || "-") +
+
+            "\nAvailable Balance: ₹" +
+            currentBalance.toFixed(2)
+        );
+
+        return;
+    }
+
+
+    const newBalance =
+        currentBalance - amount;
+
+
+    const {
+        error: updateError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .update({
+
+        balance: newBalance
+
+    })
+    .eq(
+        "id",
+        verifiedWithdrawAccount.id
+    );
+
+
+    if (updateError) {
+
+        alert(
+            "Withdrawal failed: " +
+            updateError.message
+        );
+
+        return;
+    }
+
+
+    const {
+        error: transactionError
+    } =
+    await supabaseClient
+    .from("transactions")
+    .insert({
+
+        account_id:
+            verifiedWithdrawAccount.id,
+
+        transaction_type:
+            "DEBIT",
+
+        amount:
+            amount,
+
+        description:
+            description,
+
+        reference_number:
+            "WDL-" + Date.now(),
+
+        status:
+            "SUCCESS"
+
+    });
+
+
+    if (transactionError) {
+
+        alert(
+            "Transaction save failed: " +
+            transactionError.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Withdrawal Successful!\n\n" +
+
+        "Customer: " +
+        (verifiedWithdrawAccount.customers?.full_name || "-") +
+
+        "\nAccount: " +
+        accountNumber +
+
+        "\nPrevious Balance: ₹" +
+        currentBalance.toFixed(2) +
+
+        "\nWithdrawal: ₹" +
+        amount.toFixed(2) +
+
+        "\nRemaining Balance: ₹" +
+        newBalance.toFixed(2)
+    );
+
+
+    document.getElementById(
+        "withdrawAccount"
+    ).value = "";
+
+    document.getElementById(
+        "withdrawAmount"
+    ).value = "";
+
+    document.getElementById(
+        "withdrawDescription"
+    ).value = "";
+
+
+    clearWithdrawVerification();
+
+    loadTransactions();
+
+}
+
+
+
+// =====================================================
+// FROM ACCOUNT INPUT
+// =====================================================
+
+let fromTimer = null;
+
+
+function handleFromAccountInput() {
+
+    verifiedFromAccount = null;
+
+    const box =
+        document.getElementById(
+            "fromVerifyBox"
+        );
+
+    box.style.display = "none";
+
+    clearTimeout(fromTimer);
+
+
+    const accountNumber =
+        document.getElementById(
+            "fromAccount"
+        ).value.trim();
+
+
+    if (!accountNumber) {
+
+        document.getElementById(
+            "fromAutoStatus"
+        ).innerHTML = "";
+
+        return;
+    }
+
+
+    document.getElementById(
+        "fromAutoStatus"
+    ).innerHTML =
+    "🔄 Verifying...";
+
+
+    fromTimer =
+    setTimeout(
+        function() {
+
+            verifyFromAccount();
+
+        },
+        400
+    );
+
+}
+
+
+
+// =====================================================
+// VERIFY FROM ACCOUNT
+// =====================================================
+
+async function verifyFromAccount() {
+
+    const accountNumber =
+        document.getElementById(
+            "fromAccount"
+        ).value.trim();
+
+    const box =
+        document.getElementById(
+            "fromVerifyBox"
+        );
+
+    const status =
+        document.getElementById(
+            "fromAutoStatus"
+        );
+
+
+    if (!accountNumber) return;
+
+
+    const result =
+        await getAccountDetails(
+            accountNumber
+        );
+
+
+    if (
+        result.error ||
+        !result.account
+    ) {
+
+        verifiedFromAccount = null;
+
+        status.innerHTML =
+        "❌ From Account Not Found";
+
+        box.style.display = "block";
+
+        box.innerHTML =
+        "❌ From Account Not Found.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
+
+    const account =
+        result.account;
+
+
+    verifiedFromAccount =
+        account;
+
+
+    status.innerHTML =
+    "✅ From Account Verified";
+
+
+    box.style.display = "block";
+
+
+    box.innerHTML =
+
+    "✅ <strong>FROM ACCOUNT VERIFIED</strong><br>" +
+
+    "Customer Name: <strong>" +
+    (account.customers?.full_name || "-") +
+    "</strong><br>" +
+
+    "Customer ID: <strong>" +
+    (account.customers?.customer_number || "-") +
+    "</strong><br>" +
+
+    "Account Number: <strong>" +
+    account.account_number +
+    "</strong><br>" +
+
+    "Account Type: <strong>" +
+    account.account_type +
+    "</strong><br>" +
+
+    "Previous Balance: <strong>₹" +
+    Number(account.balance || 0).toFixed(2) +
+    "</strong>";
+
+
+    box.className =
+    "verify-box verify-success";
+
+}
+
+
+
+// =====================================================
+// TO ACCOUNT INPUT
+// =====================================================
+
+let toTimer = null;
+
+
+function handleToAccountInput() {
+
+    verifiedToAccount = null;
+
+    const box =
+        document.getElementById(
+            "toVerifyBox"
+        );
+
+    box.style.display = "none";
+
+    clearTimeout(toTimer);
+
+
+    const accountNumber =
+        document.getElementById(
+            "toAccount"
+        ).value.trim();
+
+
+    if (!accountNumber) {
+
+        document.getElementById(
+            "toAutoStatus"
+        ).innerHTML = "";
+
+        return;
+    }
+
+
+    document.getElementById(
+        "toAutoStatus"
+    ).innerHTML =
+    "🔄 Verifying...";
+
+
+    toTimer =
+    setTimeout(
+        function() {
+
+            verifyToAccount();
+
+        },
+        400
+    );
+
+}
+
+
+
+// =====================================================
+// VERIFY TO ACCOUNT
+// =====================================================
+
+async function verifyToAccount() {
+
+    const accountNumber =
+        document.getElementById(
+            "toAccount"
+        ).value.trim();
+
+    const box =
+        document.getElementById(
+            "toVerifyBox"
+        );
+
+    const status =
+        document.getElementById(
+            "toAutoStatus"
+        );
+
+
+    if (!accountNumber) return;
+
+
+    const result =
+        await getAccountDetails(
+            accountNumber
+        );
+
+
+    if (
+        result.error ||
+        !result.account
+    ) {
+
+        verifiedToAccount = null;
+
+        status.innerHTML =
+        "❌ To Account Not Found";
+
+        box.style.display = "block";
+
+        box.innerHTML =
+        "❌ To Account Not Found.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
+
+    const account =
+        result.account;
+
+
+    verifiedToAccount =
+        account;
+
+
+    status.innerHTML =
+    "✅ To Account Verified";
+
+
+    box.style.display = "block";
+
+
+    box.innerHTML =
+
+    "✅ <strong>TO ACCOUNT VERIFIED</strong><br>" +
+
+    "Customer Name: <strong>" +
+    (account.customers?.full_name || "-") +
+    "</strong><br>" +
+
+    "Customer ID: <strong>" +
+    (account.customers?.customer_number || "-") +
+    "</strong><br>" +
+
+    "Account Number: <strong>" +
+    account.account_number +
+    "</strong><br>" +
+
+    "Account Type: <strong>" +
+    account.account_type +
+    "</strong><br>" +
+
+    "Previous Balance: <strong>₹" +
+    Number(account.balance || 0).toFixed(2) +
+    "</strong>";
+
+
+    box.className =
+    "verify-box verify-success";
+
+}
+
+
+
+// =====================================================
+// VERIFY BOTH TRANSFER ACCOUNTS
+// =====================================================
+
+async function verifyTransferAccounts() {
+
+    await verifyFromAccount();
+
+    await verifyToAccount();
+
+
+    if (
+        verifiedFromAccount &&
+        verifiedToAccount
+    ) {
+
+        if (
+            verifiedFromAccount.account_number ===
+            verifiedToAccount.account_number
+        ) {
+
+            alert(
+                "From and To Account cannot be same."
+            );
+
+            verifiedToAccount = null;
+
+            return;
+        }
+
+
+        alert(
+            "Both Accounts Verified Successfully."
+        );
+
+    }
+
+}
+
+
+
+// =====================================================
+// CLEAR TRANSFER
+// =====================================================
+
+function clearTransferVerification() {
+
+    verifiedFromAccount = null;
+
+    verifiedToAccount = null;
+
+
+    const fromBox =
+        document.getElementById(
+            "fromVerifyBox"
+        );
+
+    const toBox =
+        document.getElementById(
+            "toVerifyBox"
+        );
+
+
+    if (fromBox) {
+
+        fromBox.style.display = "none";
+        fromBox.innerHTML = "";
+
+    }
+
+
+    if (toBox) {
+
+        toBox.style.display = "none";
+        toBox.innerHTML = "";
+
+    }
+
+
+    const fromStatus =
+        document.getElementById(
+            "fromAutoStatus"
+        );
+
+    const toStatus =
+        document.getElementById(
+            "toAutoStatus"
+        );
+
+
+    if (fromStatus)
+        fromStatus.innerHTML = "";
+
+
+    if (toStatus)
+        toStatus.innerHTML = "";
+
+}
+
+
+
+// =====================================================
+// TRANSFER MONEY
+// =====================================================
+
+async function transferMoney() {
+
+    if (
+        !verifiedFromAccount ||
+        !verifiedToAccount
+    ) {
+
+        alert(
+            "Please verify both accounts first."
+        );
+
+        return;
+    }
+
+
+    const fromAccount =
+        document.getElementById(
+            "fromAccount"
+        ).value.trim();
+
+
+    const toAccount =
+        document.getElementById(
+            "toAccount"
+        ).value.trim();
+
+
+    const amount =
+        Number(
+            document.getElementById(
+                "transferAmount"
+            ).value
+        );
+
+
+    const description =
+        document.getElementById(
+            "transferDescription"
+        ).value.trim()
+        || "Money Transfer";
+
+
+    if (
+        fromAccount !==
+        verifiedFromAccount.account_number
+    ) {
+
+        alert(
+            "From Account changed. Please verify again."
+        );
+
+        clearTransferVerification();
+
+        return;
+    }
+
+
+    if (
+        toAccount !==
+        verifiedToAccount.account_number
+    ) {
+
+        alert(
+            "To Account changed. Please verify again."
+        );
+
+        clearTransferVerification();
+
+        return;
+    }
+
+
+    if (
+        fromAccount ===
+        toAccount
+    ) {
+
+        alert(
+            "From and To Account cannot be same."
+        );
+
+        return;
+    }
+
+
+    if (
+        !amount ||
+        amount <= 0
+    ) {
+
+        alert(
+            "Please enter valid transfer amount."
+        );
+
+        return;
+    }
+
+
+    const senderBalance =
+        Number(
+            verifiedFromAccount.balance || 0
+        );
+
+
+    const receiverBalance =
+        Number(
+            verifiedToAccount.balance || 0
+        );
+
+
+    if (senderBalance < amount) {
+
+        alert(
+            "Insufficient Balance!\n\n" +
+
+            "Customer: " +
+            (
+                verifiedFromAccount
+                .customers
+                ?.full_name || "-"
+            ) +
+
+            "\nAvailable Balance: ₹" +
+            senderBalance.toFixed(2)
+        );
+
+        return;
+    }
+
+
+    const newSenderBalance =
         senderBalance - amount;
 
-      const newReceiverBalance =
-        Number(receiver.balance || 0) + amount;
+
+    const newReceiverBalance =
+        receiverBalance + amount;
 
 
-      const { error: senderUpdateError } =
-        await supabaseClient
-          .from("accounts")
-          .update({
-            balance: newSenderBalance
-          })
-          .eq("id", sender.id);
-
-      if (senderUpdateError) {
-
-        console.error(senderUpdateError);
-
-        message.innerText =
-          "Sender balance update failed.";
-
-        message.style.color = "red";
-
-        return;
-      }
+    const reference =
+        "TRF-" + Date.now();
 
 
-      const { error: receiverUpdateError } =
-        await supabaseClient
-          .from("accounts")
-          .update({
-            balance: newReceiverBalance
-          })
-          .eq("id", receiver.id);
+    // UPDATE SENDER
 
-      if (receiverUpdateError) {
+    const {
+        error: senderUpdateError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .update({
 
-        console.error(receiverUpdateError);
+        balance:
+            newSenderBalance
 
-        message.innerText =
-          "Receiver balance update failed.";
+    })
+    .eq(
+        "id",
+        verifiedFromAccount.id
+    );
 
-        message.style.color = "red";
+
+    if (senderUpdateError) {
+
+        alert(
+            "Sender balance update failed: " +
+            senderUpdateError.message
+        );
 
         return;
-      }
-
-
-      // Sender transaction
-
-      await supabaseClient
-        .from("transactions")
-        .insert({
-
-          account_id: sender.id,
-
-          transaction_type: "DEBIT",
-
-          amount: amount,
-
-          description: description,
-
-          reference_number:
-            "TRF-" + Date.now(),
-
-          status: "SUCCESS"
-
-        });
-
-
-      // Receiver transaction
-
-      await supabaseClient
-        .from("transactions")
-        .insert({
-
-          account_id: receiver.id,
-
-          transaction_type: "CREDIT",
-
-          amount: amount,
-
-          description: description,
-
-          reference_number:
-            "TRF-" + Date.now(),
-
-          status: "SUCCESS"
-
-        });
-
-
-      message.innerText =
-        "✅ Transfer Successful.";
-
-      message.style.color = "green";
-
-      document.getElementById(
-        "transferAmount"
-      ).value = "";
-
-      loadStaffTransactions();
-
     }
 
 
-    // ==========================================
-    // LOAD TRANSACTIONS
-    // ==========================================
+    // UPDATE RECEIVER
 
-    async function loadStaffTransactions() {
+    const {
+        error: receiverUpdateError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .update({
 
-      const { data, error } =
-        await supabaseClient
-          .from("transactions")
-          .select(`
-            *,
-            accounts (
-              account_number
-            )
-          `)
-          .order("created_at", {
-            ascending: false
-          })
-          .limit(20);
+        balance:
+            newReceiverBalance
 
-      const list =
-        document.getElementById(
-          "staffTransactionList"
+    })
+    .eq(
+        "id",
+        verifiedToAccount.id
+    );
+
+
+    if (receiverUpdateError) {
+
+        alert(
+            "Receiver balance update failed: " +
+            receiverUpdateError.message
         );
 
-      if (!list) return;
+        return;
+    }
 
-      list.innerHTML = "";
 
-      if (error) {
+    // DEBIT TRANSACTION
+
+    const {
+        error: debitError
+    } =
+    await supabaseClient
+    .from("transactions")
+    .insert({
+
+        account_id:
+            verifiedFromAccount.id,
+
+        transaction_type:
+            "DEBIT",
+
+        amount:
+            amount,
+
+        description:
+            description,
+
+        reference_number:
+            reference,
+
+        status:
+            "SUCCESS"
+
+    });
+
+
+    if (debitError) {
+
+        alert(
+            "Debit transaction failed: " +
+            debitError.message
+        );
+
+        return;
+    }
+
+
+    // CREDIT TRANSACTION
+
+    const {
+        error: creditError
+    } =
+    await supabaseClient
+    .from("transactions")
+    .insert({
+
+        account_id:
+            verifiedToAccount.id,
+
+        transaction_type:
+            "CREDIT",
+
+        amount:
+            amount,
+
+        description:
+            description,
+
+        reference_number:
+            reference,
+
+        status:
+            "SUCCESS"
+
+    });
+
+
+    if (creditError) {
+
+        alert(
+            "Credit transaction failed: " +
+            creditError.message
+        );
+
+        return;
+    }
+
+
+    alert(
+
+        "Transfer Successful!\n\n" +
+
+        "From Customer: " +
+        (
+            verifiedFromAccount
+            .customers
+            ?.full_name || "-"
+        ) +
+
+        "\nFrom Account: " +
+        fromAccount +
+
+        "\n\nTo Customer: " +
+        (
+            verifiedToAccount
+            .customers
+            ?.full_name || "-"
+        ) +
+
+        "\nTo Account: " +
+        toAccount +
+
+        "\n\nAmount: ₹" +
+        amount.toFixed(2) +
+
+        "\n\nSender New Balance: ₹" +
+        newSenderBalance.toFixed(2)
+
+    );
+
+
+    document.getElementById(
+        "fromAccount"
+    ).value = "";
+
+    document.getElementById(
+        "toAccount"
+    ).value = "";
+
+    document.getElementById(
+        "transferAmount"
+    ).value = "";
+
+    document.getElementById(
+        "transferDescription"
+    ).value = "";
+
+
+    clearTransferVerification();
+
+    loadTransactions();
+
+}
+
+
+
+// =====================================================
+// LOAD TRANSACTIONS
+// =====================================================
+
+async function loadTransactions() {
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+    .from("transactions")
+    .select(`
+        *,
+        accounts (
+            account_number
+        )
+    `)
+    .order(
+        "created_at",
+        {
+            ascending: false
+        }
+    )
+    .limit(30);
+
+
+    const list =
+        document.getElementById(
+            "transactionList"
+        );
+
+
+    if (!list) return;
+
+
+    list.innerHTML = "";
+
+
+    if (error) {
 
         console.error(error);
 
         list.innerHTML =
-          `<tr>
+        `<tr>
             <td colspan="6">
-              Unable to load transactions
+                Unable to load transactions
             </td>
-          </tr>`;
+        </tr>`;
 
         return;
-      }
-
-      if (!data || data.length === 0) {
-
-        list.innerHTML =
-          `<tr>
-            <td colspan="6">
-              No transactions found
-            </td>
-          </tr>`;
-
-        return;
-      }
-
-      data.forEach(transaction => {
-
-        const row =
-          document.createElement("tr");
-
-        const type =
-          transaction.transaction_type || "-";
-
-        const typeClass =
-          type === "CREDIT"
-            ? "credit"
-            : "debit";
-
-        const accountNumber =
-          transaction.accounts
-            ? transaction.accounts.account_number
-            : "-";
-
-        row.innerHTML = `
-
-          <td>${accountNumber}</td>
-
-          <td class="${typeClass}">
-            ${type}
-          </td>
-
-          <td>
-            ₹${Number(transaction.amount || 0).toFixed(2)}
-          </td>
-
-          <td>
-            ${transaction.description || "-"}
-          </td>
-
-          <td>
-            ${transaction.reference_number || "-"}
-          </td>
-
-          <td>
-            ${transaction.status || "-"}
-          </td>
-
-        `;
-
-        list.appendChild(row);
-
-      });
-
     }
 
 
-    // ==========================================
-    // LOGOUT
-    // ==========================================
+    if (
+        !data ||
+        data.length === 0
+    ) {
 
-    document
-      .getElementById("logoutBtn")
-      .addEventListener(
-        "click",
-        async function() {
+        list.innerHTML =
+        `<tr>
+            <td colspan="6">
+                No transactions found
+            </td>
+        </tr>`;
 
-          await supabaseClient.auth.signOut();
+        return;
+    }
 
-          window.location.href =
-            "index.html";
+
+    data.forEach(
+        function(transaction) {
+
+            const row =
+                document.createElement("tr");
+
+
+            const type =
+                transaction.transaction_type ||
+                transaction.type ||
+                "-";
+
+
+            const typeClass =
+                type === "CREDIT"
+                ? "credit"
+                : "debit";
+
+
+            const accountNumber =
+                transaction.accounts
+                ?.account_number || "-";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${accountNumber}
+                </td>
+
+                <td class="${typeClass}">
+                    ${type}
+                </td>
+
+                <td>
+                    ₹${Number(
+                        transaction.amount || 0
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ${transaction.description || "-"}
+                </td>
+
+                <td>
+                    ${transaction.status || "-"}
+                </td>
+
+                <td>
+                    ${
+                        transaction.created_at
+                        ?
+                        new Date(
+                            transaction.created_at
+                        ).toLocaleString()
+                        :
+                        "-"
+                    }
+                </td>
+
+            `;
+
+
+            list.appendChild(row);
 
         }
-      );
+    );
+
+}
 
 
-    // ==========================================
-    // START
-    // ==========================================
 
-    loadStaffTransactions();
+// =====================================================
+// LOGOUT
+// =====================================================
 
-  </script>
+document
+.getElementById("logoutBtn")
+.addEventListener(
+    "click",
+    async function() {
+
+        const {
+            error
+        } =
+        await supabaseClient
+        .auth
+        .signOut();
+
+
+        if (error) {
+
+            alert(
+                "Logout failed: " +
+                error.message
+            );
+
+            return;
+        }
+
+
+        window.location.href =
+            "index.html";
+
+    }
+);
+
+
+
+// =====================================================
+// START
+// =====================================================
+
+loadTransactions();
+
+</script>
 
 </body>
+
 </html>
