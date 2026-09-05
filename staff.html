@@ -267,7 +267,32 @@ th {
 
 
 <div class="grid">
+    
+<!-- =====================================================
+     CUSTOMER SEARCH
+===================================================== -->
 
+<div class="card full">
+
+    <h3>🔎 Customer Search</h3>
+
+    <p class="small">
+        Customer Name किंवा Account Number ने ग्राहक शोधा
+    </p>
+
+    <input
+        type="text"
+        id="customerSearch"
+        placeholder="Enter Customer Name or Account Number"
+        oninput="searchCustomer()">
+
+    <div
+        id="customerSearchResult"
+        class="verify-box">
+
+    </div>
+
+</div>
 
 <!-- =====================================================
      CREATE CUSTOMER
@@ -2653,6 +2678,399 @@ document
 // START
 // =====================================================
 
+    // =====================================================
+// CUSTOMER SEARCH
+// SEARCH BY NAME OR ACCOUNT NUMBER
+// =====================================================
+
+let customerSearchTimer = null;
+
+async function searchCustomer() {
+
+    const searchValue =
+        document.getElementById("customerSearch")
+        .value
+        .trim();
+
+    const box =
+        document.getElementById("customerSearchResult");
+
+    clearTimeout(customerSearchTimer);
+
+    if (!searchValue) {
+
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+    }
+
+    box.style.display = "block";
+
+    box.className = "verify-box";
+
+    box.innerHTML = "🔍 Searching...";
+
+    customerSearchTimer = setTimeout(
+        async function() {
+
+            try {
+
+                // -----------------------------------------
+                // ACCOUNT NUMBER SEARCH
+                // -----------------------------------------
+
+                const {
+                    data: account,
+                    error: accountError
+                } =
+                await supabaseClient
+                .from("accounts")
+                .select(`
+                    id,
+                    account_number,
+                    account_type,
+                    balance,
+                    customers (
+                        id,
+                        customer_number,
+                        full_name,
+                        address,
+                        aadhaar_number,
+                        pan_number,
+                        mobile,
+                        email
+                    )
+                `)
+                .eq(
+                    "account_number",
+                    searchValue
+                )
+                .maybeSingle();
+
+
+                // -----------------------------------------
+                // IF ACCOUNT NUMBER FOUND
+                // -----------------------------------------
+
+                if (account && !accountError) {
+
+                    showCustomerSearchResult(
+                        account,
+                        account.customers
+                    );
+
+                    return;
+                }
+
+
+                // -----------------------------------------
+                // SEARCH CUSTOMER BY NAME
+                // -----------------------------------------
+
+                const {
+                    data: customers,
+                    error: customerError
+                } =
+                await supabaseClient
+                .from("customers")
+                .select(`
+                    id,
+                    customer_number,
+                    full_name,
+                    address,
+                    aadhaar_number,
+                    pan_number,
+                    mobile,
+                    email,
+                    accounts (
+                        id,
+                        account_number,
+                        account_type,
+                        balance
+                    )
+                `)
+                .ilike(
+                    "full_name",
+                    "%" + searchValue + "%"
+                )
+                .limit(10);
+
+
+                if (
+                    customerError ||
+                    !customers ||
+                    customers.length === 0
+                ) {
+
+                    box.innerHTML =
+                    "❌ Customer Not Found.";
+
+                    box.className =
+                    "verify-box verify-error";
+
+                    return;
+                }
+
+
+                // -----------------------------------------
+                // ONE CUSTOMER
+                // -----------------------------------------
+
+                if (customers.length === 1) {
+
+                    const customer =
+                        customers[0];
+
+                    const accounts =
+                        customer.accounts || [];
+
+                    if (accounts.length === 0) {
+
+                        box.innerHTML =
+                        "⚠️ Customer found, but no account exists.";
+
+                        box.className =
+                        "verify-box verify-error";
+
+                        return;
+                    }
+
+
+                    if (accounts.length === 1) {
+
+                        showCustomerSearchResult(
+                            accounts[0],
+                            customer
+                        );
+
+                        return;
+                    }
+
+
+                    // Multiple accounts
+                    let html =
+                    "✅ <strong>CUSTOMER FOUND</strong><br><br>" +
+
+                    "Customer Name: <strong>" +
+                    customer.full_name +
+                    "</strong><br>" +
+
+                    "Customer ID: <strong>" +
+                    (customer.customer_number || "-") +
+                    "</strong><br>" +
+
+                    "Mobile: <strong>" +
+                    (customer.mobile || "-") +
+                    "</strong><br><br>" +
+
+                    "<strong>Accounts:</strong><br>";
+
+                    accounts.forEach(
+                        function(acc) {
+
+                            html +=
+                            "• Account: <strong>" +
+                            acc.account_number +
+                            "</strong> | " +
+                            acc.account_type +
+                            " | Balance: ₹" +
+                            Number(
+                                acc.balance || 0
+                            ).toFixed(2) +
+                            "<br>";
+
+                        }
+                    );
+
+                    box.innerHTML = html;
+
+                    box.className =
+                    "verify-box verify-success";
+
+                    return;
+                }
+
+
+                // -----------------------------------------
+                // MULTIPLE CUSTOMER NAME MATCHES
+                // -----------------------------------------
+
+                let html =
+                    "🔎 <strong>Multiple Customers Found</strong><br><br>";
+
+                customers.forEach(
+                    function(customer) {
+
+                        html +=
+                        "<div style='padding:10px 0;" +
+                        "border-bottom:1px solid #ddd'>" +
+
+                        "<strong>" +
+                        customer.full_name +
+                        "</strong><br>" +
+
+                        "Customer ID: " +
+                        (customer.customer_number || "-") +
+
+                        "<br>" +
+
+                        "Mobile: " +
+                        (customer.mobile || "-") +
+
+                        "<br>";
+
+                        if (
+                            customer.accounts &&
+                            customer.accounts.length
+                        ) {
+
+                            customer.accounts.forEach(
+                                function(acc) {
+
+                                    html +=
+                                    "Account: <strong>" +
+                                    acc.account_number +
+                                    "</strong> | " +
+                                    acc.account_type +
+                                    " | ₹" +
+                                    Number(
+                                        acc.balance || 0
+                                    ).toFixed(2) +
+                                    "<br>";
+
+                                }
+                            );
+
+                        }
+
+                        html += "</div>";
+
+                    }
+                );
+
+
+                box.innerHTML = html;
+
+                box.className =
+                    "verify-box verify-success";
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                box.innerHTML =
+                "❌ Search Error: " +
+                error.message;
+
+                box.className =
+                "verify-box verify-error";
+
+            }
+
+        },
+        300
+    );
+}
+
+
+
+// =====================================================
+// SHOW CUSTOMER SEARCH RESULT
+// =====================================================
+
+function showCustomerSearchResult(
+    account,
+    customer
+) {
+
+    const box =
+        document.getElementById(
+            "customerSearchResult"
+        );
+
+    if (!customer) {
+
+        box.innerHTML =
+        "❌ Customer information not found.";
+
+        box.className =
+        "verify-box verify-error";
+
+        return;
+    }
+
+
+    box.innerHTML =
+
+    "✅ <strong>CUSTOMER VERIFIED</strong><br><br>" +
+
+    "👤 Customer Name: <strong>" +
+    (customer.full_name || "-") +
+    "</strong><br>" +
+
+    "🆔 Customer ID: <strong>" +
+    (customer.customer_number || "-") +
+    "</strong><br>" +
+
+    "🏦 Account Number: <strong>" +
+    (account.account_number || "-") +
+    "</strong><br>" +
+
+    "💳 Account Type: <strong>" +
+    (account.account_type || "-") +
+    "</strong><br>" +
+
+    "📍 Address: <strong>" +
+    (customer.address || "-") +
+    "</strong><br>" +
+
+    "📱 Mobile: <strong>" +
+    (customer.mobile || "-") +
+    "</strong><br>" +
+
+    "✉️ Email: <strong>" +
+    (customer.email || "-") +
+    "</strong><br>" +
+
+    "🪪 Aadhaar: <strong>" +
+    maskAadhaar(customer.aadhaar_number) +
+    "</strong><br>" +
+
+    "PAN: <strong>" +
+    (customer.pan_number || "-") +
+    "</strong><br>" +
+
+    "💰 Current Balance: <strong>₹" +
+    Number(account.balance || 0).toFixed(2) +
+    "</strong>";
+
+    box.className =
+        "verify-box verify-success";
+}
+
+
+
+// =====================================================
+// MASK AADHAAR
+// =====================================================
+
+function maskAadhaar(aadhaar) {
+
+    if (!aadhaar) return "-";
+
+    const value =
+        String(aadhaar);
+
+    if (value.length === 12) {
+
+        return "XXXX-XXXX-" +
+            value.substring(8);
+    }
+
+    return "XXXX";
+}
 loadTransactions();
 
 </script>
