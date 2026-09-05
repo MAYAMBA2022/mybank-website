@@ -24,6 +24,7 @@ content="width=device-width, initial-scale=1.0">
 body {
     background: #f1f5f9;
     min-height: 100vh;
+    color: #1e293b;
 }
 
 .header {
@@ -34,6 +35,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header h2 {
@@ -52,7 +57,7 @@ body {
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1150px;
     margin: 30px auto;
     padding: 20px;
 }
@@ -61,12 +66,80 @@ body {
     margin-bottom: 25px;
 }
 
-.grid {
+.welcome h2 {
+    margin-bottom: 7px;
+}
+
+.small {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+/* =========================================
+   DASHBOARD MENU
+========================================= */
+
+.dashboard-grid {
     display: grid;
     grid-template-columns:
-        repeat(auto-fit, minmax(320px, 1fr));
+        repeat(auto-fit, minmax(230px, 1fr));
 
-    gap: 20px;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.menu-card {
+    background: white;
+    min-height: 120px;
+    padding: 25px 20px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,0.08);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.menu-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.12);
+}
+
+.menu-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.menu-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.menu-subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* =========================================
+   SECTION
+========================================= */
+
+.section {
+    display: none;
+    margin-bottom: 20px;
+}
+
+.section.active {
+    display: block;
 }
 
 .card {
@@ -108,11 +181,6 @@ button {
     cursor: pointer;
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
 .blue {
     background: #2563eb;
     color: white;
@@ -139,6 +207,16 @@ button:disabled {
     margin-bottom: 12px;
 }
 
+.close-btn {
+    background: #64748b;
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* =========================================
+   VERIFY BOX
+========================================= */
+
 .verify-box {
     display: none;
 
@@ -164,14 +242,19 @@ button:disabled {
     color: red;
 }
 
-.full {
-    grid-column: 1 / -1;
-}
+/* =========================================
+   RESULT
+========================================= */
 
-.small {
-    color: #64748b;
-    font-size: 13px;
-    margin-bottom: 12px;
+.result {
+    margin-top: 15px;
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border-radius: 7px;
+
+    line-height: 1.7;
 }
 
 .success {
@@ -184,15 +267,45 @@ button:disabled {
     font-weight: bold;
 }
 
-.result {
+/* =========================================
+   SEARCH
+========================================= */
+
+.search-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.search-result {
     margin-top: 15px;
-    padding: 12px;
+}
 
+.customer-box {
     background: #f8fafc;
+    border: 1px solid #cbd5e1;
 
-    border-radius: 7px;
+    padding: 16px;
 
-    line-height: 1.7;
+    border-radius: 8px;
+
+    line-height: 1.9;
+
+    margin-bottom: 12px;
+}
+
+.balance {
+    font-size: 20px;
+    font-weight: bold;
+    color: #16a34a;
+}
+
+/* =========================================
+   TABLE
+========================================= */
+
+.table-wrapper {
+    overflow-x: auto;
 }
 
 table {
@@ -209,6 +322,8 @@ td {
         1px solid #e2e8f0;
 
     text-align: left;
+
+    white-space: nowrap;
 }
 
 th {
@@ -225,6 +340,10 @@ th {
     font-weight: bold;
 }
 
+/* =========================================
+   MOBILE
+========================================= */
+
 @media(max-width:600px) {
 
     .header {
@@ -236,21 +355,38 @@ th {
     }
 
     .container {
-        padding: 10px;
+        padding: 12px;
         margin: 15px auto;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .menu-card {
+        min-height: 110px;
+        padding: 18px 14px;
+    }
+
+    .menu-icon {
+        font-size: 27px;
+    }
+
+    .menu-title {
+        font-size: 15px;
+    }
+
+    .menu-subtitle {
+        font-size: 11px;
     }
 
     .card {
         padding: 18px;
     }
 
-    table {
-        font-size: 13px;
-    }
-
-    th,
-    td {
-        padding: 8px;
+    .search-buttons {
+        grid-template-columns: 1fr;
     }
 
 }
@@ -263,9 +399,9 @@ th {
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================
      HEADER
-===================================================== -->
+========================================= -->
 
 <div class="header">
 
@@ -285,306 +421,674 @@ th {
 <div class="container">
 
 
-<div class="welcome">
+    <div class="welcome">
 
-    <h2>Banking Operations</h2>
+        <h2>Banking Operations</h2>
 
-    <p class="small">
-        Customer Management • Deposit • Withdrawal • Transfer
-    </p>
-
-</div>
-
-
-<div class="grid">
-
-
-<!-- =====================================================
-     CREATE CUSTOMER
-===================================================== -->
-
-<div class="card">
-
-    <h3>👤 Create Customer & Account</h3>
-
-    <input
-        type="text"
-        id="newCustomerName"
-        placeholder="Customer Full Name">
-
-    <input
-        type="text"
-        id="newCustomerAddress"
-        placeholder="Address">
-
-    <input
-        type="text"
-        id="newCustomerAadhaar"
-        placeholder="Aadhaar Number"
-        maxlength="12"
-        inputmode="numeric">
-
-    <input
-        type="text"
-        id="newCustomerPan"
-        placeholder="PAN Number"
-        maxlength="10"
-        style="text-transform:uppercase">
-
-    <input
-        type="text"
-        id="newCustomerMobile"
-        placeholder="Mobile Number"
-        maxlength="10"
-        inputmode="numeric">
-
-    <input
-        type="email"
-        id="newCustomerEmail"
-        placeholder="Email">
-
-    <input
-        type="file"
-        id="newCustomerPhoto"
-        accept="image/*">
-
-    <select id="accountTypeSelect">
-
-        <option value="SAVINGS">
-            Savings Account
-        </option>
-
-        <option value="CURRENT">
-            Current Account
-        </option>
-
-    </select>
-
-    <button
-        class="blue"
-        onclick="createCustomerAndAccount()">
-
-        Create Customer & Account
-
-    </button>
-
-    <div
-        id="accountCreateMessage"
-        class="result">
+        <p class="small">
+            Select an operation below
+        </p>
 
     </div>
 
-</div>
+
+    <!-- =========================================
+         BIG DASHBOARD BOXES
+    ========================================= -->
+
+    <div class="dashboard-grid">
 
 
-<!-- =====================================================
-     DEPOSIT
-===================================================== -->
+        <div
+            class="menu-card"
+            onclick="openSection('customerSection')">
 
-<div class="card">
+            <div class="menu-icon">👤</div>
 
-    <h3>💰 Cash Deposit</h3>
+            <div class="menu-title">
+                Customer Account Open
+            </div>
 
-    <input
-        type="text"
-        id="depositAccount"
-        placeholder="Enter Account Number"
-        oninput="clearDepositVerification()">
+            <div class="menu-subtitle">
+                Create customer & account
+            </div>
 
-    <button
-        class="verify-btn"
-        onclick="verifyDepositAccount()">
+        </div>
 
-        🔍 Verify Account
 
-    </button>
+        <div
+            class="menu-card"
+            onclick="openSection('searchSection')">
 
-    <div
-        id="depositVerifyBox"
-        class="verify-box">
+            <div class="menu-icon">🔎</div>
+
+            <div class="menu-title">
+                Account Search
+            </div>
+
+            <div class="menu-subtitle">
+                Search by name / account
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-card"
+            onclick="openSection('depositSection')">
+
+            <div class="menu-icon">💰</div>
+
+            <div class="menu-title">
+                Cash Deposit
+            </div>
+
+            <div class="menu-subtitle">
+                Deposit money
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-card"
+            onclick="openSection('withdrawSection')">
+
+            <div class="menu-icon">💵</div>
+
+            <div class="menu-title">
+                Cash Withdrawal
+            </div>
+
+            <div class="menu-subtitle">
+                Withdraw money
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-card"
+            onclick="openSection('transferSection')">
+
+            <div class="menu-icon">🔄</div>
+
+            <div class="menu-title">
+                Money Transfer
+            </div>
+
+            <div class="menu-subtitle">
+                Transfer between accounts
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-card"
+            onclick="openSection('transactionSection')">
+
+            <div class="menu-icon">📋</div>
+
+            <div class="menu-title">
+                Recent Transactions
+            </div>
+
+            <div class="menu-subtitle">
+                Latest transactions
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-card"
+            onclick="openSection('statementSection')">
+
+            <div class="menu-icon">🧾</div>
+
+            <div class="menu-title">
+                Account Statement
+            </div>
+
+            <div class="menu-subtitle">
+                View account statement
+            </div>
+
+        </div>
+
 
     </div>
 
-    <input
-        type="number"
-        id="depositAmount"
-        placeholder="Enter Deposit Amount"
-        min="1">
 
-    <input
-        type="text"
-        id="depositDescription"
-        placeholder="Description">
-
-    <button
-        class="green"
-        id="depositBtn"
-        onclick="depositMoney()">
-
-        Deposit Money
-
-    </button>
-
-</div>
-
-
-<!-- =====================================================
-     WITHDRAWAL
-===================================================== -->
-
-<div class="card">
-
-    <h3>💵 Cash Withdrawal</h3>
-
-    <input
-        type="text"
-        id="withdrawAccount"
-        placeholder="Enter Account Number"
-        oninput="clearWithdrawVerification()">
-
-    <button
-        class="verify-btn"
-        onclick="verifyWithdrawAccount()">
-
-        🔍 Verify Account
-
-    </button>
+    <!-- =========================================
+         CUSTOMER ACCOUNT OPEN
+    ========================================= -->
 
     <div
-        id="withdrawVerifyBox"
-        class="verify-box">
+        id="customerSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>👤 Create Customer & Account</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('customerSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <input
+                type="text"
+                id="newCustomerName"
+                placeholder="Customer Full Name">
+
+
+            <input
+                type="text"
+                id="newCustomerAddress"
+                placeholder="Address">
+
+
+            <input
+                type="text"
+                id="newCustomerAadhaar"
+                placeholder="Aadhaar Number"
+                maxlength="12"
+                inputmode="numeric">
+
+
+            <input
+                type="text"
+                id="newCustomerPan"
+                placeholder="PAN Number"
+                maxlength="10"
+                style="text-transform:uppercase">
+
+
+            <input
+                type="text"
+                id="newCustomerMobile"
+                placeholder="Mobile Number"
+                maxlength="10"
+                inputmode="numeric">
+
+
+            <input
+                type="email"
+                id="newCustomerEmail"
+                placeholder="Email">
+
+
+            <select id="accountTypeSelect">
+
+                <option value="SAVINGS">
+                    Savings Account
+                </option>
+
+                <option value="CURRENT">
+                    Current Account
+                </option>
+
+            </select>
+
+
+            <button
+                class="blue"
+                onclick="createCustomerAndAccount()">
+
+                Create Customer & Account
+
+            </button>
+
+
+            <div
+                id="accountCreateMessage"
+                class="result">
+
+            </div>
+
+        </div>
 
     </div>
 
-    <input
-        type="number"
-        id="withdrawAmount"
-        placeholder="Enter Withdrawal Amount"
-        min="1">
 
-    <input
-        type="text"
-        id="withdrawDescription"
-        placeholder="Description">
-
-    <button
-        class="red"
-        id="withdrawBtn"
-        onclick="withdrawMoney()">
-
-        Withdraw Money
-
-    </button>
-
-</div>
-
-
-<!-- =====================================================
-     TRANSFER
-===================================================== -->
-
-<div class="card">
-
-    <h3>🔄 Money Transfer</h3>
-
-    <input
-        type="text"
-        id="fromAccount"
-        placeholder="From Account Number"
-        oninput="clearTransferVerification()">
-
-    <button
-        class="verify-btn"
-        onclick="verifyTransferAccounts()">
-
-        🔍 Verify Both Accounts
-
-    </button>
+    <!-- =========================================
+         ACCOUNT SEARCH
+    ========================================= -->
 
     <div
-        id="fromVerifyBox"
-        class="verify-box">
+        id="searchSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>🔎 Account / Customer Search</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('searchSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <input
+                type="text"
+                id="customerSearch"
+                placeholder="Enter Customer Name or Account Number"
+                onkeydown="if(event.key==='Enter') searchCustomer()">
+
+
+            <div class="search-buttons">
+
+                <button
+                    class="blue"
+                    onclick="searchCustomer()">
+
+                    🔎 Search
+
+                </button>
+
+
+                <button
+                    class="verify-btn"
+                    onclick="clearCustomerSearch()">
+
+                    Clear
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="customerSearchResult"
+                class="search-result">
+
+            </div>
+
+        </div>
 
     </div>
 
-    <input
-        type="text"
-        id="toAccount"
-        placeholder="To Account Number"
-        oninput="clearTransferVerification()">
+
+    <!-- =========================================
+         DEPOSIT
+    ========================================= -->
 
     <div
-        id="toVerifyBox"
-        class="verify-box">
+        id="depositSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>💰 Cash Deposit</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('depositSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <input
+                type="text"
+                id="depositAccount"
+                placeholder="Enter Account Number"
+                oninput="clearDepositVerification()">
+
+
+            <button
+                class="verify-btn"
+                onclick="verifyDepositAccount()">
+
+                🔍 Verify Account
+
+            </button>
+
+
+            <div
+                id="depositVerifyBox"
+                class="verify-box">
+
+            </div>
+
+
+            <input
+                type="number"
+                id="depositAmount"
+                placeholder="Enter Deposit Amount"
+                min="1">
+
+
+            <input
+                type="text"
+                id="depositDescription"
+                placeholder="Description">
+
+
+            <button
+                class="green"
+                onclick="depositMoney()">
+
+                Deposit Money
+
+            </button>
+
+        </div>
 
     </div>
 
-    <input
-        type="number"
-        id="transferAmount"
-        placeholder="Transfer Amount"
-        min="1">
 
-    <input
-        type="text"
-        id="transferDescription"
-        placeholder="Description">
+    <!-- =========================================
+         WITHDRAW
+    ========================================= -->
 
-    <button
-        class="orange"
-        id="transferBtn"
-        onclick="transferMoney()">
+    <div
+        id="withdrawSection"
+        class="section">
 
-        Transfer Money
+        <div class="card">
 
-    </button>
+            <h3>💵 Cash Withdrawal</h3>
 
-</div>
+            <button
+                class="close-btn"
+                onclick="closeSection('withdrawSection')">
 
+                ✕ Close
 
-<!-- =====================================================
-     RECENT TRANSACTIONS
-===================================================== -->
-
-<div class="card full">
-
-    <h3>📋 Recent Transactions</h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>Account</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Date</th>
-
-            </tr>
-
-        </thead>
-
-        <tbody id="transactionList">
-
-            <tr>
-
-                <td colspan="6">
-                    Loading...
-                </td>
-
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
+            </button>
 
 
-</div>
+            <input
+                type="text"
+                id="withdrawAccount"
+                placeholder="Enter Account Number"
+                oninput="clearWithdrawVerification()">
+
+
+            <button
+                class="verify-btn"
+                onclick="verifyWithdrawAccount()">
+
+                🔍 Verify Account
+
+            </button>
+
+
+            <div
+                id="withdrawVerifyBox"
+                class="verify-box">
+
+            </div>
+
+
+            <input
+                type="number"
+                id="withdrawAmount"
+                placeholder="Enter Withdrawal Amount"
+                min="1">
+
+
+            <input
+                type="text"
+                id="withdrawDescription"
+                placeholder="Description">
+
+
+            <button
+                class="red"
+                onclick="withdrawMoney()">
+
+                Withdraw Money
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         TRANSFER
+    ========================================= -->
+
+    <div
+        id="transferSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>🔄 Money Transfer</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('transferSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <input
+                type="text"
+                id="fromAccount"
+                placeholder="From Account Number"
+                oninput="clearTransferVerification()">
+
+
+            <input
+                type="text"
+                id="toAccount"
+                placeholder="To Account Number"
+                oninput="clearTransferVerification()">
+
+
+            <button
+                class="verify-btn"
+                onclick="verifyTransferAccounts()">
+
+                🔍 Verify Both Accounts
+
+            </button>
+
+
+            <div
+                id="fromVerifyBox"
+                class="verify-box">
+
+            </div>
+
+
+            <div
+                id="toVerifyBox"
+                class="verify-box">
+
+            </div>
+
+
+            <input
+                type="number"
+                id="transferAmount"
+                placeholder="Transfer Amount"
+                min="1">
+
+
+            <input
+                type="text"
+                id="transferDescription"
+                placeholder="Description">
+
+
+            <button
+                class="orange"
+                onclick="transferMoney()">
+
+                Transfer Money
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         RECENT TRANSACTIONS
+    ========================================= -->
+
+    <div
+        id="transactionSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>📋 Recent Transactions</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('transactionSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <button
+                class="blue"
+                onclick="loadTransactions()">
+
+                🔄 Refresh Transactions
+
+            </button>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Account</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Date</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="transactionList">
+
+                        <tr>
+
+                            <td colspan="7">
+                                Loading...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         ACCOUNT STATEMENT
+    ========================================= -->
+
+    <div
+        id="statementSection"
+        class="section">
+
+        <div class="card">
+
+            <h3>🧾 Account Statement</h3>
+
+            <button
+                class="close-btn"
+                onclick="closeSection('statementSection')">
+
+                ✕ Close
+
+            </button>
+
+
+            <input
+                type="text"
+                id="statementAccount"
+                placeholder="Enter Account Number">
+
+
+            <button
+                class="blue"
+                onclick="getAccountStatement()">
+
+                🧾 Get Account Statement
+
+            </button>
+
+
+            <div
+                id="statementCustomer"
+                class="result">
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="statementList">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 
 </div>
 
@@ -593,7 +1097,7 @@ th {
 
 
 // =====================================================
-// SUPABASE CONFIGURATION
+// SUPABASE
 // =====================================================
 
 const SUPABASE_URL =
@@ -610,51 +1114,158 @@ supabase.createClient(
 
 
 // =====================================================
-// CUSTOMER CREATE
+// DASHBOARD SECTION
+// =====================================================
+
+function openSection(sectionId) {
+
+    document.querySelectorAll(".section")
+    .forEach(function(section) {
+
+        section.classList.remove("active");
+
+    });
+
+
+    const section =
+        document.getElementById(sectionId);
+
+
+    if (section) {
+
+        section.classList.add("active");
+
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+
+    if (sectionId === "transactionSection") {
+
+        loadTransactions();
+
+    }
+
+}
+
+
+function closeSection(sectionId) {
+
+    const section =
+        document.getElementById(sectionId);
+
+    if (section) {
+
+        section.classList.remove("active");
+
+    }
+
+}
+
+
+// =====================================================
+// SAFE HTML
+// =====================================================
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// =====================================================
+// UNIQUE REFERENCE NUMBER
+// IMPORTANT
+// =====================================================
+
+function uniqueReference(prefix) {
+
+    if (
+        window.crypto &&
+        typeof crypto.randomUUID === "function"
+    ) {
+
+        return prefix +
+            "-" +
+            crypto.randomUUID();
+
+    }
+
+
+    return prefix +
+        "-" +
+        Date.now() +
+        "-" +
+        Math.random()
+            .toString(36)
+            .substring(2, 10);
+
+}
+
+
+// =====================================================
+// CREATE CUSTOMER + ACCOUNT
 // =====================================================
 
 async function createCustomerAndAccount() {
 
     const name =
-        document.getElementById("newCustomerName")
-        .value.trim();
+        document.getElementById(
+            "newCustomerName"
+        ).value.trim();
 
     const address =
-        document.getElementById("newCustomerAddress")
-        .value.trim();
+        document.getElementById(
+            "newCustomerAddress"
+        ).value.trim();
 
     const aadhaar =
-        document.getElementById("newCustomerAadhaar")
-        .value.trim();
+        document.getElementById(
+            "newCustomerAadhaar"
+        ).value.trim();
 
     const pan =
-        document.getElementById("newCustomerPan")
-        .value.trim()
-        .toUpperCase();
+        document.getElementById(
+            "newCustomerPan"
+        ).value.trim().toUpperCase();
 
     const mobile =
-        document.getElementById("newCustomerMobile")
-        .value.trim();
+        document.getElementById(
+            "newCustomerMobile"
+        ).value.trim();
 
     const email =
-        document.getElementById("newCustomerEmail")
-        .value.trim();
+        document.getElementById(
+            "newCustomerEmail"
+        ).value.trim();
 
     const accountType =
-        document.getElementById("accountTypeSelect")
-        .value;
+        document.getElementById(
+            "accountTypeSelect"
+        ).value;
 
     const message =
-        document.getElementById("accountCreateMessage");
+        document.getElementById(
+            "accountCreateMessage"
+        );
 
 
     if (!name) {
 
-        message.innerHTML =
-        "❌ Customer name required.";
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Customer name required.",
+            "error"
+        );
 
         return;
     }
@@ -662,11 +1273,11 @@ async function createCustomerAndAccount() {
 
     if (!address) {
 
-        message.innerHTML =
-        "❌ Address required.";
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Address required.",
+            "error"
+        );
 
         return;
     }
@@ -674,11 +1285,11 @@ async function createCustomerAndAccount() {
 
     if (!/^\d{12}$/.test(aadhaar)) {
 
-        message.innerHTML =
-        "❌ Aadhaar must contain 12 digits.";
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Aadhaar must contain 12 digits.",
+            "error"
+        );
 
         return;
     }
@@ -686,11 +1297,11 @@ async function createCustomerAndAccount() {
 
     if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(pan)) {
 
-        message.innerHTML =
-        "❌ Invalid PAN number.";
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Invalid PAN number.",
+            "error"
+        );
 
         return;
     }
@@ -701,21 +1312,21 @@ async function createCustomerAndAccount() {
         !/^\d{10}$/.test(mobile)
     ) {
 
-        message.innerHTML =
-        "❌ Mobile must contain 10 digits.";
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Mobile must contain 10 digits.",
+            "error"
+        );
 
         return;
     }
 
 
-    message.innerHTML =
-    "Creating Customer...";
-
-    message.className =
-    "result";
+    showMessage(
+        message,
+        "Creating Customer...",
+        ""
+    );
 
 
     try {
@@ -744,12 +1355,12 @@ async function createCustomerAndAccount() {
 
         if (customerError) {
 
-            message.innerHTML =
-            "❌ Customer creation failed:<br>" +
-            customerError.message;
-
-            message.className =
-            "result error";
+            showMessage(
+                message,
+                "❌ Customer creation failed:<br>" +
+                escapeHtml(customerError.message),
+                "error"
+            );
 
             return;
         }
@@ -769,7 +1380,8 @@ async function createCustomerAndAccount() {
             account_type:
                 accountType,
 
-            balance: 0
+            balance:
+                0
 
         })
         .select(
@@ -780,12 +1392,12 @@ async function createCustomerAndAccount() {
 
         if (accountError) {
 
-            message.innerHTML =
-            "❌ Account creation failed:<br>" +
-            accountError.message;
-
-            message.className =
-            "result error";
+            showMessage(
+                message,
+                "❌ Account creation failed:<br>" +
+                escapeHtml(accountError.message),
+                "error"
+            );
 
             return;
         }
@@ -793,48 +1405,422 @@ async function createCustomerAndAccount() {
 
         message.innerHTML =
 
-        "✅ Customer Created Successfully!<br><br>" +
+            "✅ <strong>Customer Created Successfully!</strong><br><br>" +
 
-        "Customer ID: <strong>" +
-        customer.customer_number +
-        "</strong><br>" +
+            "Customer ID: <strong>" +
+            escapeHtml(customer.customer_number) +
+            "</strong><br>" +
 
-        "Account Number: <strong>" +
-        account.account_number +
-        "</strong><br>" +
+            "Account Number: <strong>" +
+            escapeHtml(account.account_number) +
+            "</strong><br>" +
 
-        "Account Type: <strong>" +
-        account.account_type +
-        "</strong><br>" +
+            "Account Type: <strong>" +
+            escapeHtml(account.account_type) +
+            "</strong><br>" +
 
-        "Opening Balance: <strong>₹0.00</strong>";
-
+            "Opening Balance: <strong>₹0.00</strong>";
 
         message.className =
-        "result success";
+            "result success";
 
 
-        document.getElementById("newCustomerName").value = "";
-        document.getElementById("newCustomerAddress").value = "";
-        document.getElementById("newCustomerAadhaar").value = "";
-        document.getElementById("newCustomerPan").value = "";
-        document.getElementById("newCustomerMobile").value = "";
-        document.getElementById("newCustomerEmail").value = "";
-        document.getElementById("newCustomerPhoto").value = "";
+        document.getElementById(
+            "newCustomerName"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerAddress"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerAadhaar"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerPan"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerMobile"
+        ).value = "";
+
+        document.getElementById(
+            "newCustomerEmail"
+        ).value = "";
 
     }
 
-    catch (error) {
+    catch(error) {
 
         console.error(error);
 
-        message.innerHTML =
-        "❌ Error: " + error.message;
-
-        message.className =
-        "result error";
+        showMessage(
+            message,
+            "❌ Error: " +
+            escapeHtml(error.message),
+            "error"
+        );
 
     }
+
+}
+
+
+// =====================================================
+// SHOW MESSAGE
+// =====================================================
+
+function showMessage(element, text, type) {
+
+    element.innerHTML = text;
+
+    element.className =
+        "result " +
+        (type || "");
+
+}
+
+
+// =====================================================
+// CUSTOMER / ACCOUNT SEARCH
+// NAME OR ACCOUNT NUMBER
+// =====================================================
+
+async function searchCustomer() {
+
+    const search =
+        document.getElementById(
+            "customerSearch"
+        ).value.trim();
+
+
+    const result =
+        document.getElementById(
+            "customerSearchResult"
+        );
+
+
+    result.innerHTML =
+        "🔍 Searching...";
+
+
+    if (!search) {
+
+        result.innerHTML =
+            "❌ Enter Customer Name or Account Number.";
+
+        return;
+    }
+
+
+    try {
+
+        // ACCOUNT NUMBER SEARCH
+
+        const {
+            data: accountData,
+            error: accountError
+        } =
+        await supabaseClient
+        .from("accounts")
+        .select(`
+            id,
+            account_number,
+            account_type,
+            balance,
+            customers (
+                id,
+                customer_number,
+                full_name,
+                address,
+                aadhaar_number,
+                pan_number,
+                mobile,
+                email
+            )
+        `)
+        .eq(
+            "account_number",
+            search
+        )
+        .limit(1);
+
+
+        if (
+            !accountError &&
+            accountData &&
+            accountData.length > 0
+        ) {
+
+            displaySearchAccounts(
+                accountData,
+                result
+            );
+
+            return;
+        }
+
+
+        // CUSTOMER NAME SEARCH
+
+        const {
+            data: customers,
+            error: customerError
+        } =
+        await supabaseClient
+        .from("customers")
+        .select(`
+            id,
+            customer_number,
+            full_name,
+            address,
+            mobile,
+            email,
+            accounts (
+                id,
+                account_number,
+                account_type,
+                balance
+            )
+        `)
+        .ilike(
+            "full_name",
+            "%" + search + "%"
+        )
+        .limit(20);
+
+
+        if (customerError) {
+
+            result.innerHTML =
+                "❌ Search failed:<br>" +
+                escapeHtml(customerError.message);
+
+            return;
+        }
+
+
+        if (
+            !customers ||
+            customers.length === 0
+        ) {
+
+            result.innerHTML =
+                "❌ Customer / Account Not Found.";
+
+            return;
+        }
+
+
+        result.innerHTML = "";
+
+
+        customers.forEach(function(customer) {
+
+            const box =
+                document.createElement("div");
+
+            box.className =
+                "customer-box";
+
+
+            let accountsHtml = "";
+
+
+            if (
+                customer.accounts &&
+                customer.accounts.length > 0
+            ) {
+
+                customer.accounts.forEach(
+                    function(account) {
+
+                        accountsHtml +=
+
+                            "<hr style='margin:10px 0'>" +
+
+                            "Account Number: <strong>" +
+                            escapeHtml(account.account_number) +
+                            "</strong><br>" +
+
+                            "Account Type: <strong>" +
+                            escapeHtml(account.account_type) +
+                            "</strong><br>" +
+
+                            "Balance: <span class='balance'>₹" +
+                            Number(
+                                account.balance || 0
+                            ).toFixed(2) +
+                            "</span>";
+
+                    }
+                );
+
+            }
+            else {
+
+                accountsHtml =
+                    "No account found.";
+
+            }
+
+
+            box.innerHTML =
+
+                "<strong>👤 Customer Name:</strong> " +
+                escapeHtml(customer.full_name) +
+
+                "<br>" +
+
+                "<strong>Customer ID:</strong> " +
+                escapeHtml(
+                    customer.customer_number
+                ) +
+
+                "<br>" +
+
+                "<strong>Mobile:</strong> " +
+                escapeHtml(
+                    customer.mobile || "-"
+                ) +
+
+                "<br>" +
+
+                "<strong>Email:</strong> " +
+                escapeHtml(
+                    customer.email || "-"
+                ) +
+
+                "<br>" +
+
+                "<strong>Address:</strong> " +
+                escapeHtml(
+                    customer.address || "-"
+                ) +
+
+                accountsHtml;
+
+
+            result.appendChild(box);
+
+        });
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        result.innerHTML =
+            "❌ Search Error:<br>" +
+            escapeHtml(error.message);
+
+    }
+
+}
+
+
+// =====================================================
+// DISPLAY ACCOUNT SEARCH
+// =====================================================
+
+function displaySearchAccounts(
+    accounts,
+    result
+) {
+
+    result.innerHTML = "";
+
+
+    accounts.forEach(function(account) {
+
+        const customer =
+            account.customers || {};
+
+
+        const box =
+            document.createElement("div");
+
+
+        box.className =
+            "customer-box";
+
+
+        box.innerHTML =
+
+            "✅ <strong>ACCOUNT FOUND</strong><br><br>" +
+
+            "<strong>Customer Name:</strong> " +
+            escapeHtml(
+                customer.full_name || "-"
+            ) +
+
+            "<br>" +
+
+            "<strong>Customer ID:</strong> " +
+            escapeHtml(
+                customer.customer_number || "-"
+            ) +
+
+            "<br>" +
+
+            "<strong>Account Number:</strong> " +
+            escapeHtml(
+                account.account_number
+            ) +
+
+            "<br>" +
+
+            "<strong>Account Type:</strong> " +
+            escapeHtml(
+                account.account_type
+            ) +
+
+            "<br>" +
+
+            "<strong>Mobile:</strong> " +
+            escapeHtml(
+                customer.mobile || "-"
+            ) +
+
+            "<br>" +
+
+            "<strong>Address:</strong> " +
+            escapeHtml(
+                customer.address || "-"
+            ) +
+
+            "<br><br>" +
+
+            "<span class='balance'>" +
+            "Current Balance: ₹" +
+            Number(
+                account.balance || 0
+            ).toFixed(2) +
+            "</span>";
+
+
+        result.appendChild(box);
+
+    });
+
+}
+
+
+// =====================================================
+// CLEAR SEARCH
+// =====================================================
+
+function clearCustomerSearch() {
+
+    document.getElementById(
+        "customerSearch"
+    ).value = "";
+
+    document.getElementById(
+        "customerSearchResult"
+    ).innerHTML = "";
 
 }
 
@@ -849,11 +1835,15 @@ let verifiedDepositAccount = null;
 async function verifyDepositAccount() {
 
     const accountNumber =
-        document.getElementById("depositAccount")
-        .value.trim();
+        document.getElementById(
+            "depositAccount"
+        ).value.trim();
+
 
     const box =
-        document.getElementById("depositVerifyBox");
+        document.getElementById(
+            "depositVerifyBox"
+        );
 
 
     verifiedDepositAccount = null;
@@ -864,10 +1854,10 @@ async function verifyDepositAccount() {
     if (!accountNumber) {
 
         box.innerHTML =
-        "❌ Please enter Account Number.";
+            "❌ Please enter Account Number.";
 
         box.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
         return;
     }
@@ -900,10 +1890,10 @@ async function verifyDepositAccount() {
     if (error || !account) {
 
         box.innerHTML =
-        "❌ Account Not Found.";
+            "❌ Account Not Found.";
 
         box.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
         return;
     }
@@ -915,31 +1905,41 @@ async function verifyDepositAccount() {
 
     box.innerHTML =
 
-    "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
+        "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
 
-    "Customer Name: <strong>" +
-    (account.customers?.full_name || "-") +
-    "</strong><br>" +
+        "Customer Name: <strong>" +
+        escapeHtml(
+            account.customers?.full_name || "-"
+        ) +
+        "</strong><br>" +
 
-    "Customer ID: <strong>" +
-    (account.customers?.customer_number || "-") +
-    "</strong><br>" +
+        "Customer ID: <strong>" +
+        escapeHtml(
+            account.customers?.customer_number || "-"
+        ) +
+        "</strong><br>" +
 
-    "Account Number: <strong>" +
-    account.account_number +
-    "</strong><br>" +
+        "Account Number: <strong>" +
+        escapeHtml(
+            account.account_number
+        ) +
+        "</strong><br>" +
 
-    "Account Type: <strong>" +
-    account.account_type +
-    "</strong><br>" +
+        "Account Type: <strong>" +
+        escapeHtml(
+            account.account_type
+        ) +
+        "</strong><br>" +
 
-    "Current Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
+        "Current Balance: <strong>₹" +
+        Number(
+            account.balance || 0
+        ).toFixed(2) +
+        "</strong>";
 
 
     box.className =
-    "verify-box verify-success";
+        "verify-box verify-success";
 
 }
 
@@ -976,18 +1976,23 @@ async function depositMoney() {
 
 
     const accountNumber =
-        document.getElementById("depositAccount")
-        .value.trim();
+        document.getElementById(
+            "depositAccount"
+        ).value.trim();
+
 
     const amount =
         Number(
-            document.getElementById("depositAmount")
-            .value
+            document.getElementById(
+                "depositAmount"
+            ).value
         );
 
+
     const description =
-        document.getElementById("depositDescription")
-        .value.trim()
+        document.getElementById(
+            "depositDescription"
+        ).value.trim()
         || "Cash Deposit";
 
 
@@ -1004,7 +2009,7 @@ async function depositMoney() {
     }
 
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
 
         alert(
             "Please enter valid amount."
@@ -1018,6 +2023,7 @@ async function depositMoney() {
         Number(
             verifiedDepositAccount.balance || 0
         );
+
 
     const newBalance =
         currentBalance + amount;
@@ -1050,9 +2056,8 @@ async function depositMoney() {
     }
 
 
-    // UNIQUE REFERENCE
     const reference =
-        "DEP-" + crypto.randomUUID();
+        uniqueReference("DEP");
 
 
     const {
@@ -1098,7 +2103,11 @@ async function depositMoney() {
         "Deposit Successful!\n\n" +
 
         "Customer: " +
-        (verifiedDepositAccount.customers?.full_name || "-") +
+        (
+            verifiedDepositAccount
+            .customers
+            ?.full_name || "-"
+        ) +
 
         "\nAccount: " +
         accountNumber +
@@ -1110,13 +2119,25 @@ async function depositMoney() {
         amount.toFixed(2) +
 
         "\nNew Balance: ₹" +
-        newBalance.toFixed(2)
+        newBalance.toFixed(2) +
+
+        "\nReference: " +
+        reference
     );
 
 
-    document.getElementById("depositAccount").value = "";
-    document.getElementById("depositAmount").value = "";
-    document.getElementById("depositDescription").value = "";
+    document.getElementById(
+        "depositAccount"
+    ).value = "";
+
+    document.getElementById(
+        "depositAmount"
+    ).value = "";
+
+    document.getElementById(
+        "depositDescription"
+    ).value = "";
+
 
     clearDepositVerification();
 
@@ -1135,11 +2156,15 @@ let verifiedWithdrawAccount = null;
 async function verifyWithdrawAccount() {
 
     const accountNumber =
-        document.getElementById("withdrawAccount")
-        .value.trim();
+        document.getElementById(
+            "withdrawAccount"
+        ).value.trim();
+
 
     const box =
-        document.getElementById("withdrawVerifyBox");
+        document.getElementById(
+            "withdrawVerifyBox"
+        );
 
 
     verifiedWithdrawAccount = null;
@@ -1150,10 +2175,10 @@ async function verifyWithdrawAccount() {
     if (!accountNumber) {
 
         box.innerHTML =
-        "❌ Please enter Account Number.";
+            "❌ Please enter Account Number.";
 
         box.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
         return;
     }
@@ -1186,46 +2211,56 @@ async function verifyWithdrawAccount() {
     if (error || !account) {
 
         box.innerHTML =
-        "❌ Account Not Found.";
+            "❌ Account Not Found.";
 
         box.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
         return;
     }
 
 
     verifiedWithdrawAccount =
-    account;
+        account;
 
 
     box.innerHTML =
 
-    "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
+        "✅ <strong>ACCOUNT VERIFIED</strong><br>" +
 
-    "Customer Name: <strong>" +
-    (account.customers?.full_name || "-") +
-    "</strong><br>" +
+        "Customer Name: <strong>" +
+        escapeHtml(
+            account.customers?.full_name || "-"
+        ) +
+        "</strong><br>" +
 
-    "Customer ID: <strong>" +
-    (account.customers?.customer_number || "-") +
-    "</strong><br>" +
+        "Customer ID: <strong>" +
+        escapeHtml(
+            account.customers?.customer_number || "-"
+        ) +
+        "</strong><br>" +
 
-    "Account Number: <strong>" +
-    account.account_number +
-    "</strong><br>" +
+        "Account Number: <strong>" +
+        escapeHtml(
+            account.account_number
+        ) +
+        "</strong><br>" +
 
-    "Account Type: <strong>" +
-    account.account_type +
-    "</strong><br>" +
+        "Account Type: <strong>" +
+        escapeHtml(
+            account.account_type
+        ) +
+        "</strong><br>" +
 
-    "Current Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
+        "Current Balance: <strong>₹" +
+        Number(
+            account.balance || 0
+        ).toFixed(2) +
+        "</strong>";
 
 
     box.className =
-    "verify-box verify-success";
+        "verify-box verify-success";
 
 }
 
@@ -1262,18 +2297,23 @@ async function withdrawMoney() {
 
 
     const accountNumber =
-        document.getElementById("withdrawAccount")
-        .value.trim();
+        document.getElementById(
+            "withdrawAccount"
+        ).value.trim();
+
 
     const amount =
         Number(
-            document.getElementById("withdrawAmount")
-            .value
+            document.getElementById(
+                "withdrawAmount"
+            ).value
         );
 
+
     const description =
-        document.getElementById("withdrawDescription")
-        .value.trim()
+        document.getElementById(
+            "withdrawDescription"
+        ).value.trim()
         || "Cash Withdrawal";
 
 
@@ -1290,7 +2330,7 @@ async function withdrawMoney() {
     }
 
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
 
         alert(
             "Please enter valid amount."
@@ -1312,7 +2352,11 @@ async function withdrawMoney() {
             "Insufficient Balance!\n\n" +
 
             "Customer: " +
-            (verifiedWithdrawAccount.customers?.full_name || "-") +
+            (
+                verifiedWithdrawAccount
+                .customers
+                ?.full_name || "-"
+            ) +
 
             "\nAvailable Balance: ₹" +
             currentBalance.toFixed(2)
@@ -1353,9 +2397,8 @@ async function withdrawMoney() {
     }
 
 
-    // UNIQUE REFERENCE
     const reference =
-        "WDL-" + crypto.randomUUID();
+        uniqueReference("WDL");
 
 
     const {
@@ -1401,7 +2444,11 @@ async function withdrawMoney() {
         "Withdrawal Successful!\n\n" +
 
         "Customer: " +
-        (verifiedWithdrawAccount.customers?.full_name || "-") +
+        (
+            verifiedWithdrawAccount
+            .customers
+            ?.full_name || "-"
+        ) +
 
         "\nAccount: " +
         accountNumber +
@@ -1413,13 +2460,25 @@ async function withdrawMoney() {
         amount.toFixed(2) +
 
         "\nRemaining Balance: ₹" +
-        newBalance.toFixed(2)
+        newBalance.toFixed(2) +
+
+        "\nReference: " +
+        reference
     );
 
 
-    document.getElementById("withdrawAccount").value = "";
-    document.getElementById("withdrawAmount").value = "";
-    document.getElementById("withdrawDescription").value = "";
+    document.getElementById(
+        "withdrawAccount"
+    ).value = "";
+
+    document.getElementById(
+        "withdrawAmount"
+    ).value = "";
+
+    document.getElementById(
+        "withdrawDescription"
+    ).value = "";
+
 
     clearWithdrawVerification();
 
@@ -1429,45 +2488,61 @@ async function withdrawMoney() {
 
 
 // =====================================================
-// TRANSFER VERIFICATION
+// TRANSFER VARIABLES
 // =====================================================
 
 let verifiedFromAccount = null;
+
 let verifiedToAccount = null;
 
+
+// =====================================================
+// TRANSFER VERIFICATION
+// =====================================================
 
 async function verifyTransferAccounts() {
 
     const fromAccount =
-        document.getElementById("fromAccount")
-        .value.trim();
+        document.getElementById(
+            "fromAccount"
+        ).value.trim();
+
 
     const toAccount =
-        document.getElementById("toAccount")
-        .value.trim();
+        document.getElementById(
+            "toAccount"
+        ).value.trim();
+
 
     const fromBox =
-        document.getElementById("fromVerifyBox");
+        document.getElementById(
+            "fromVerifyBox"
+        );
+
 
     const toBox =
-        document.getElementById("toVerifyBox");
+        document.getElementById(
+            "toVerifyBox"
+        );
 
 
     verifiedFromAccount = null;
+
     verifiedToAccount = null;
 
 
     fromBox.style.display = "block";
+
     toBox.style.display = "block";
 
 
     if (!fromAccount) {
 
         fromBox.innerHTML =
-        "❌ Enter From Account Number.";
+            "❌ Enter From Account Number.";
 
         fromBox.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
     }
 
@@ -1475,15 +2550,34 @@ async function verifyTransferAccounts() {
     if (!toAccount) {
 
         toBox.innerHTML =
-        "❌ Enter To Account Number.";
+            "❌ Enter To Account Number.";
 
         toBox.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
     }
 
 
     if (!fromAccount || !toAccount) {
+
+        return;
+    }
+
+
+    if (fromAccount === toAccount) {
+
+        fromBox.innerHTML =
+            "❌ From and To Account cannot be same.";
+
+        toBox.innerHTML =
+            "❌ From and To Account cannot be same.";
+
+        fromBox.className =
+            "verify-box verify-error";
+
+        toBox.className =
+            "verify-box verify-error";
+
         return;
     }
 
@@ -1517,10 +2611,10 @@ async function verifyTransferAccounts() {
     if (senderError || !sender) {
 
         fromBox.innerHTML =
-        "❌ From Account Not Found.";
+            "❌ From Account Not Found.";
 
         fromBox.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
     }
     else {
@@ -1531,30 +2625,41 @@ async function verifyTransferAccounts() {
 
         fromBox.innerHTML =
 
-        "✅ <strong>FROM ACCOUNT VERIFIED</strong><br>" +
+            "✅ <strong>FROM ACCOUNT VERIFIED</strong><br>" +
 
-        "Customer Name: <strong>" +
-        (sender.customers?.full_name || "-") +
-        "</strong><br>" +
+            "Customer Name: <strong>" +
+            escapeHtml(
+                sender.customers?.full_name || "-"
+            ) +
+            "</strong><br>" +
 
-        "Customer ID: <strong>" +
-        (sender.customers?.customer_number || "-") +
-        "</strong><br>" +
+            "Customer ID: <strong>" +
+            escapeHtml(
+                sender.customers?.customer_number || "-"
+            ) +
+            "</strong><br>" +
 
-        "Account Number: <strong>" +
-        sender.account_number +
-        "</strong><br>" +
+            "Account Number: <strong>" +
+            escapeHtml(
+                sender.account_number
+            ) +
+            "</strong><br>" +
 
-        "Account Type: <strong>" +
-        sender.account_type +
-        "</strong><br>" +
+            "Account Type: <strong>" +
+            escapeHtml(
+                sender.account_type
+            ) +
+            "</strong><br>" +
 
-        "Current Balance: <strong>₹" +
-        Number(sender.balance || 0).toFixed(2) +
-        "</strong>";
+            "Current Balance: <strong>₹" +
+            Number(
+                sender.balance || 0
+            ).toFixed(2) +
+            "</strong>";
+
 
         fromBox.className =
-        "verify-box verify-success";
+            "verify-box verify-success";
 
     }
 
@@ -1585,16 +2690,13 @@ async function verifyTransferAccounts() {
     .single();
 
 
-    if (
-        receiverError ||
-        !receiver
-    ) {
+    if (receiverError || !receiver) {
 
         toBox.innerHTML =
-        "❌ To Account Not Found.";
+            "❌ To Account Not Found.";
 
         toBox.className =
-        "verify-box verify-error";
+            "verify-box verify-error";
 
     }
     else {
@@ -1605,30 +2707,41 @@ async function verifyTransferAccounts() {
 
         toBox.innerHTML =
 
-        "✅ <strong>TO ACCOUNT VERIFIED</strong><br>" +
+            "✅ <strong>TO ACCOUNT VERIFIED</strong><br>" +
 
-        "Customer Name: <strong>" +
-        (receiver.customers?.full_name || "-") +
-        "</strong><br>" +
+            "Customer Name: <strong>" +
+            escapeHtml(
+                receiver.customers?.full_name || "-"
+            ) +
+            "</strong><br>" +
 
-        "Customer ID: <strong>" +
-        (receiver.customers?.customer_number || "-") +
-        "</strong><br>" +
+            "Customer ID: <strong>" +
+            escapeHtml(
+                receiver.customers?.customer_number || "-"
+            ) +
+            "</strong><br>" +
 
-        "Account Number: <strong>" +
-        receiver.account_number +
-        "</strong><br>" +
+            "Account Number: <strong>" +
+            escapeHtml(
+                receiver.account_number
+            ) +
+            "</strong><br>" +
 
-        "Account Type: <strong>" +
-        receiver.account_type +
-        "</strong><br>" +
+            "Account Type: <strong>" +
+            escapeHtml(
+                receiver.account_type
+            ) +
+            "</strong><br>" +
 
-        "Current Balance: <strong>₹" +
-        Number(receiver.balance || 0).toFixed(2) +
-        "</strong>";
+            "Current Balance: <strong>₹" +
+            Number(
+                receiver.balance || 0
+            ).toFixed(2) +
+            "</strong>";
+
 
         toBox.className =
-        "verify-box verify-success";
+            "verify-box verify-success";
 
     }
 
@@ -1636,17 +2749,20 @@ async function verifyTransferAccounts() {
 
 
 // =====================================================
-// CLEAR TRANSFER VERIFICATION
+// CLEAR TRANSFER
 // =====================================================
 
 function clearTransferVerification() {
 
     verifiedFromAccount = null;
+
     verifiedToAccount = null;
+
 
     document.getElementById(
         "fromVerifyBox"
     ).style.display = "none";
+
 
     document.getElementById(
         "toVerifyBox"
@@ -1675,22 +2791,29 @@ async function transferMoney() {
 
 
     const fromAccount =
-        document.getElementById("fromAccount")
-        .value.trim();
+        document.getElementById(
+            "fromAccount"
+        ).value.trim();
+
 
     const toAccount =
-        document.getElementById("toAccount")
-        .value.trim();
+        document.getElementById(
+            "toAccount"
+        ).value.trim();
+
 
     const amount =
         Number(
-            document.getElementById("transferAmount")
-            .value
+            document.getElementById(
+                "transferAmount"
+            ).value
         );
 
+
     const description =
-        document.getElementById("transferDescription")
-        .value.trim()
+        document.getElementById(
+            "transferDescription"
+        ).value.trim()
         || "Money Transfer";
 
 
@@ -1720,10 +2843,7 @@ async function transferMoney() {
     }
 
 
-    if (
-        fromAccount ===
-        toAccount
-    ) {
+    if (fromAccount === toAccount) {
 
         alert(
             "From and To Account cannot be same."
@@ -1733,10 +2853,7 @@ async function transferMoney() {
     }
 
 
-    if (
-        !amount ||
-        amount <= 0
-    ) {
+    if (!Number.isFinite(amount) || amount <= 0) {
 
         alert(
             "Please enter valid transfer amount."
@@ -1751,6 +2868,7 @@ async function transferMoney() {
             verifiedFromAccount.balance || 0
         );
 
+
     const receiverBalance =
         Number(
             verifiedToAccount.balance || 0
@@ -1764,7 +2882,8 @@ async function transferMoney() {
 
             "Customer: " +
             (
-                verifiedFromAccount.customers
+                verifiedFromAccount
+                .customers
                 ?.full_name || "-"
             ) +
 
@@ -1779,26 +2898,9 @@ async function transferMoney() {
     const newSenderBalance =
         senderBalance - amount;
 
+
     const newReceiverBalance =
         receiverBalance + amount;
-
-
-    // =================================================
-    // UNIQUE TRANSFER REFERENCES
-    // =================================================
-
-    const transferId =
-        crypto.randomUUID();
-
-    const debitReference =
-        "TRF-" +
-        transferId +
-        "-D";
-
-    const creditReference =
-        "TRF-" +
-        transferId +
-        "-C";
 
 
     // =================================================
@@ -1856,6 +2958,22 @@ async function transferMoney() {
 
     if (receiverUpdateError) {
 
+        // Try to restore sender balance
+
+        await supabaseClient
+        .from("accounts")
+        .update({
+
+            balance:
+                senderBalance
+
+        })
+        .eq(
+            "id",
+            verifiedFromAccount.id
+        );
+
+
         alert(
             "Receiver balance update failed: " +
             receiverUpdateError.message
@@ -1863,6 +2981,18 @@ async function transferMoney() {
 
         return;
     }
+
+
+    // =================================================
+    // UNIQUE TRANSFER REFERENCES
+    // IMPORTANT FIX
+    // =================================================
+
+    const debitReference =
+        uniqueReference("TRF-D");
+
+    const creditReference =
+        uniqueReference("TRF-C");
 
 
     // =================================================
@@ -1898,6 +3028,30 @@ async function transferMoney() {
 
 
     if (debitError) {
+
+        // Restore both balances
+
+        await supabaseClient
+        .from("accounts")
+        .update({
+            balance: senderBalance
+        })
+        .eq(
+            "id",
+            verifiedFromAccount.id
+        );
+
+
+        await supabaseClient
+        .from("accounts")
+        .update({
+            balance: receiverBalance
+        })
+        .eq(
+            "id",
+            verifiedToAccount.id
+        );
+
 
         alert(
             "Debit transaction failed: " +
@@ -1942,6 +3096,30 @@ async function transferMoney() {
 
     if (creditError) {
 
+        // Restore balances
+
+        await supabaseClient
+        .from("accounts")
+        .update({
+            balance: senderBalance
+        })
+        .eq(
+            "id",
+            verifiedFromAccount.id
+        );
+
+
+        await supabaseClient
+        .from("accounts")
+        .update({
+            balance: receiverBalance
+        })
+        .eq(
+            "id",
+            verifiedToAccount.id
+        );
+
+
         alert(
             "Credit transaction failed: " +
             creditError.message
@@ -1961,7 +3139,8 @@ async function transferMoney() {
 
         "From Customer: " +
         (
-            verifiedFromAccount.customers
+            verifiedFromAccount
+            .customers
             ?.full_name || "-"
         ) +
 
@@ -1970,7 +3149,8 @@ async function transferMoney() {
 
         "\n\nTo Customer: " +
         (
-            verifiedToAccount.customers
+            verifiedToAccount
+            .customers
             ?.full_name || "-"
         ) +
 
@@ -1986,10 +3166,22 @@ async function transferMoney() {
     );
 
 
-    document.getElementById("fromAccount").value = "";
-    document.getElementById("toAccount").value = "";
-    document.getElementById("transferAmount").value = "";
-    document.getElementById("transferDescription").value = "";
+    document.getElementById(
+        "fromAccount"
+    ).value = "";
+
+    document.getElementById(
+        "toAccount"
+    ).value = "";
+
+    document.getElementById(
+        "transferAmount"
+    ).value = "";
+
+    document.getElementById(
+        "transferDescription"
+    ).value = "";
+
 
     clearTransferVerification();
 
@@ -1999,10 +3191,28 @@ async function transferMoney() {
 
 
 // =====================================================
-// LOAD TRANSACTIONS
+// RECENT TRANSACTIONS
 // =====================================================
 
 async function loadTransactions() {
+
+    const list =
+        document.getElementById(
+            "transactionList"
+        );
+
+
+    if (!list) return;
+
+
+    list.innerHTML =
+
+        `<tr>
+            <td colspan="7">
+                Loading...
+            </td>
+        </tr>`;
+
 
     const {
         data,
@@ -2025,116 +3235,348 @@ async function loadTransactions() {
     .limit(30);
 
 
-    const list =
-        document.getElementById(
-            "transactionList"
-        );
-
-
-    if (!list) return;
-
-
-    list.innerHTML = "";
-
-
     if (error) {
 
         console.error(error);
 
         list.innerHTML =
-        `<tr>
-            <td colspan="6">
-                Unable to load transactions
+
+            `<tr>
+                <td colspan="7">
+                    Unable to load transactions
+                </td>
+            </tr>`;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        list.innerHTML =
+
+            `<tr>
+                <td colspan="7">
+                    No transactions found
+                </td>
+            </tr>`;
+
+        return;
+    }
+
+
+    list.innerHTML = "";
+
+
+    data.forEach(function(transaction) {
+
+        const row =
+            document.createElement("tr");
+
+
+        const type =
+            transaction.transaction_type ||
+            transaction.type ||
+            "-";
+
+
+        const typeClass =
+            type === "CREDIT"
+                ? "credit"
+                : "debit";
+
+
+        const accountNumber =
+            transaction.accounts
+            ?.account_number || "-";
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHtml(accountNumber)}
             </td>
-        </tr>`;
+
+            <td class="${typeClass}">
+                ${escapeHtml(type)}
+            </td>
+
+            <td>
+                ₹${Number(
+                    transaction.amount || 0
+                ).toFixed(2)}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.description || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.reference_number || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.status || "-"
+                )}
+            </td>
+
+            <td>
+                ${
+                    transaction.created_at
+                    ?
+                    new Date(
+                        transaction.created_at
+                    ).toLocaleString()
+                    :
+                    "-"
+                }
+            </td>
+
+        `;
+
+
+        list.appendChild(row);
+
+    });
+
+}
+
+
+// =====================================================
+// ACCOUNT STATEMENT
+// =====================================================
+
+async function getAccountStatement() {
+
+    const accountNumber =
+        document.getElementById(
+            "statementAccount"
+        ).value.trim();
+
+
+    const customerBox =
+        document.getElementById(
+            "statementCustomer"
+        );
+
+
+    const list =
+        document.getElementById(
+            "statementList"
+        );
+
+
+    customerBox.innerHTML =
+        "🔍 Loading statement...";
+
+    list.innerHTML = "";
+
+
+    if (!accountNumber) {
+
+        customerBox.innerHTML =
+            "❌ Please enter Account Number.";
+
+        return;
+    }
+
+
+    // ACCOUNT DETAILS
+
+    const {
+        data: account,
+        error: accountError
+    } =
+    await supabaseClient
+    .from("accounts")
+    .select(`
+        id,
+        account_number,
+        account_type,
+        balance,
+        customers (
+            customer_number,
+            full_name,
+            mobile
+        )
+    `)
+    .eq(
+        "account_number",
+        accountNumber
+    )
+    .single();
+
+
+    if (accountError || !account) {
+
+        customerBox.innerHTML =
+            "❌ Account Not Found.";
+
+        return;
+    }
+
+
+    customerBox.innerHTML =
+
+        "👤 <strong>Customer Name:</strong> " +
+        escapeHtml(
+            account.customers?.full_name || "-"
+        ) +
+
+        "<br>" +
+
+        "<strong>Customer ID:</strong> " +
+        escapeHtml(
+            account.customers?.customer_number || "-"
+        ) +
+
+        "<br>" +
+
+        "<strong>Account Number:</strong> " +
+        escapeHtml(
+            account.account_number
+        ) +
+
+        "<br>" +
+
+        "<strong>Account Type:</strong> " +
+        escapeHtml(
+            account.account_type
+        ) +
+
+        "<br>" +
+
+        "<span class='balance'>" +
+        "Current Balance: ₹" +
+        Number(
+            account.balance || 0
+        ).toFixed(2) +
+        "</span>";
+
+
+    // TRANSACTIONS
+
+    const {
+        data: transactions,
+        error
+    } =
+    await supabaseClient
+    .from("transactions")
+    .select("*")
+    .eq(
+        "account_id",
+        account.id
+    )
+    .order(
+        "created_at",
+        {
+            ascending: false
+        }
+    );
+
+
+    if (error) {
+
+        list.innerHTML =
+
+            `<tr>
+                <td colspan="6">
+                    Unable to load statement
+                </td>
+            </tr>`;
 
         return;
     }
 
 
     if (
-        !data ||
-        data.length === 0
+        !transactions ||
+        transactions.length === 0
     ) {
 
         list.innerHTML =
-        `<tr>
-            <td colspan="6">
-                No transactions found
-            </td>
-        </tr>`;
+
+            `<tr>
+                <td colspan="6">
+                    No transactions found
+                </td>
+            </tr>`;
 
         return;
     }
 
 
-    data.forEach(
-        function(transaction) {
+    transactions.forEach(function(transaction) {
 
-            const row =
-                document.createElement("tr");
-
-
-            const type =
-                transaction.transaction_type ||
-                transaction.type ||
-                "-";
+        const row =
+            document.createElement("tr");
 
 
-            const typeClass =
-                type === "CREDIT"
+        const type =
+            transaction.transaction_type ||
+            transaction.type ||
+            "-";
+
+
+        const typeClass =
+            type === "CREDIT"
                 ? "credit"
                 : "debit";
 
 
-            const accountNumber =
-                transaction.accounts
-                ?.account_number || "-";
+        row.innerHTML = `
 
-
-            row.innerHTML = `
-
-                <td>
-                    ${accountNumber}
-                </td>
-
-                <td class="${typeClass}">
-                    ${type}
-                </td>
-
-                <td>
-                    ₹${Number(
-                        transaction.amount || 0
-                    ).toFixed(2)}
-                </td>
-
-                <td>
-                    ${transaction.description || "-"}
-                </td>
-
-                <td>
-                    ${transaction.status || "-"}
-                </td>
-
-                <td>
-                    ${
+            <td>
+                ${
+                    transaction.created_at
+                    ?
+                    new Date(
                         transaction.created_at
-                        ?
-                        new Date(
-                            transaction.created_at
-                        ).toLocaleString()
-                        :
-                        "-"
-                    }
-                </td>
+                    ).toLocaleString()
+                    :
+                    "-"
+                }
+            </td>
 
-            `;
+            <td class="${typeClass}">
+                ${escapeHtml(type)}
+            </td>
+
+            <td>
+                ₹${Number(
+                    transaction.amount || 0
+                ).toFixed(2)}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.description || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.reference_number || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    transaction.status || "-"
+                )}
+            </td>
+
+        `;
 
 
-            list.appendChild(row);
+        list.appendChild(row);
 
-        }
-    );
+    });
 
 }
 
