@@ -1151,132 +1151,145 @@ function clearDepositVerification(){
 // DEPOSIT
 // =====================================================
 
-async function depositMoney(){
+async function depositMoney() {
 
-    if(!verifiedDepositAccount){
-
+    if (!verifiedDepositAccount) {
         alert("Please verify the Account Number first.");
         return;
     }
 
-
     const accountNumber =
-    document.getElementById("depositAccount")
-    .value.trim();
+        document.getElementById("depositAccount").value.trim();
 
     const amount =
-    Number(
-        document.getElementById("depositAmount").value
-    );
+        Number(
+            document.getElementById("depositAmount").value
+        );
 
     const description =
-    document.getElementById("depositDescription")
-    .value.trim() || "Cash Deposit";
+        document.getElementById("depositDescription").value.trim()
+        || "Cash Deposit";
 
-
-    if(accountNumber !== verifiedDepositAccount.account_number){
-
+    // Account बदलला असल्यास पुन्हा Verify करणे आवश्यक
+    if (
+        accountNumber !==
+        verifiedDepositAccount.account_number
+    ) {
         alert("Account changed. Please verify again.");
         return;
     }
 
-
-    if(!amount || amount<=0){
-
+    // Amount validation
+    if (!amount || amount <= 0) {
         alert("Please enter valid amount.");
         return;
     }
 
+    const depositBtn =
+        document.getElementById("depositBtn");
 
-    const currentBalance =
-    Number(verifiedDepositAccount.balance || 0);
+    depositBtn.disabled = true;
+    depositBtn.innerText = "Processing...";
 
-    const newBalance =
-    currentBalance + amount;
+    try {
 
+        // ============================================
+        // IMPORTANT:
+        // Balance + Transaction दोन्ही
+        // Supabase database function मधून होतील.
+        // ============================================
 
-    const {
-        error:updateError
-    } =
-    await supabaseClient
-    .from("accounts")
-    .update({
-        balance:newBalance
-    })
-    .eq(
-        "id",
-        verifiedDepositAccount.id
-    );
-
-
-    if(updateError){
-
-        alert("Deposit failed: " + updateError.message);
-        return;
-    }
-
-
-    const reference =
-    "DEP-" +
-    new Date().getTime() +
-    "-" +
-    Math.random().toString(36).substring(2,8).toUpperCase();
-
-
-    const {
-        error:transactionError
-    } =
-    await supabaseClient
-    .from("transactions")
-    .insert({
-
-        account_id:verifiedDepositAccount.id,
-        transaction_type:"CREDIT",
-        amount:amount,
-        description:description,
-        reference_number:reference,
-        status:"SUCCESS"
-
-    });
-
-
-    if(transactionError){
-
-        alert(
-            "Balance updated but transaction save failed: " +
-            transactionError.message
+        const {
+            data,
+            error
+        } = await supabaseClient.rpc(
+            "staff_cash_deposit",
+            {
+                p_account_number: accountNumber,
+                p_amount: amount,
+                p_description: description
+            }
         );
 
-        return;
+        if (error) {
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            throw new Error(
+                "Deposit completed but updated balance was not returned."
+            );
+        }
+
+        const updatedAccount = data[0];
+
+        // ============================================
+        // SUCCESS MESSAGE
+        // ============================================
+
+        alert(
+            "Deposit Successful!\n\n" +
+
+            "Customer: " +
+            (
+                verifiedDepositAccount.customers?.full_name
+                || "-"
+            ) +
+
+            "\nAccount: " +
+            accountNumber +
+
+            "\nDeposit: ₹" +
+            amount.toFixed(2) +
+
+            "\nNew Balance: ₹" +
+            Number(
+                updatedAccount.balance || 0
+            ).toFixed(2)
+        );
+
+        // ============================================
+        // CLEAR FORM
+        // ============================================
+
+        document.getElementById(
+            "depositAccount"
+        ).value = "";
+
+        document.getElementById(
+            "depositAmount"
+        ).value = "";
+
+        document.getElementById(
+            "depositDescription"
+        ).value = "";
+
+        clearDepositVerification();
+
+        // Recent Transactions refresh
+        loadTransactions();
+
     }
+    catch (error) {
 
+        console.error(
+            "Cash Deposit Error:",
+            error
+        );
 
-    alert(
-        "Deposit Successful!\n\n" +
-        "Customer: " +
-        (verifiedDepositAccount.customers?.full_name || "-") +
-        "\nAccount: " +
-        accountNumber +
-        "\nPrevious Balance: ₹" +
-        currentBalance.toFixed(2) +
-        "\nDeposit: ₹" +
-        amount.toFixed(2) +
-        "\nNew Balance: ₹" +
-        newBalance.toFixed(2) +
-        "\nReference: " +
-        reference
-    );
+        alert(
+            "Deposit Failed!\n\n" +
+            error.message
+        );
 
+    }
+    finally {
 
-    document.getElementById("depositAccount").value="";
-    document.getElementById("depositAmount").value="";
-    document.getElementById("depositDescription").value="";
+        depositBtn.disabled = false;
+        depositBtn.innerText = "Deposit Money";
 
-    clearDepositVerification();
-
-    loadTransactions();
+    }
 }
-
 
 // =====================================================
 // WITHDRAW VERIFY
