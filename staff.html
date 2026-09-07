@@ -1008,59 +1008,44 @@ async function searchCustomer(){
     }
 }
 
-
 // =====================================================
 // FIND ACCOUNT
 // =====================================================
 
-async function findAccount(accountNumber){
+async function findAccount(accountNumber) {
 
-    const cleanAccountNumber =
-        String(accountNumber || "").trim();
-
-    if(!cleanAccountNumber){
-
+    if (!accountNumber) {
         return {
             account: null,
-            error: new Error("Please enter Account Number")
+            error: new Error("Account Number is required")
         };
     }
-
 
     try {
 
         const {
             data,
             error
-        } =
-        await supabaseClient
-        .from("accounts")
-        .select(`
-            id,
-            account_number,
-            account_type,
-            balance,
-            status,
-            customers(
-                customer_number,
-                full_name,
-                mobile,
-                address
-            )
-        `)
-        .eq(
-            "account_number",
-            cleanAccountNumber
-        )
-        .limit(1);
+        } = await supabaseClient
+            .from("accounts")
+            .select(`
+                id,
+                account_number,
+                account_type,
+                balance,
+                status,
+                customers(
+                    customer_number,
+                    full_name,
+                    mobile,
+                    address
+                )
+            `)
+            .eq("account_number", accountNumber)
+            .maybeSingle();
 
-
-        if(error){
-
-            console.error(
-                "Find Account Error:",
-                error
-            );
+        if (error) {
+            console.error("Find Account Error:", error);
 
             return {
                 account: null,
@@ -1068,30 +1053,21 @@ async function findAccount(accountNumber){
             };
         }
 
-
-        if(!data || data.length === 0){
-
+        if (!data) {
             return {
                 account: null,
-                error: new Error(
-                    "Account Not Found"
-                )
+                error: new Error("Account Not Found")
             };
         }
 
-
         return {
-            account: data[0],
+            account: data,
             error: null
         };
 
-    }
-    catch(error){
+    } catch (error) {
 
-        console.error(
-            "Find Account Exception:",
-            error
-        );
+        console.error("Find Account Exception:", error);
 
         return {
             account: null,
