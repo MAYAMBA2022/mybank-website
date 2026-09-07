@@ -1755,71 +1755,72 @@ async function transferMoney(){
     }
 
 
-    const reference =
-    "TRF-" +
-    new Date().getTime() +
-    "-" +
-    Math.random().toString(36).substring(2,8).toUpperCase();
+    // =================================================
+// UNIQUE TRANSFER REFERENCES
+// =================================================
+
+const baseReference =
+  "TRF-" +
+  crypto.randomUUID().replace(/-/g, "");
+
+const debitReference = baseReference + "-D";
+const creditReference = baseReference + "-C";
 
 
-    // DEBIT
+// =================================================
+// DEBIT TRANSACTION
+// =================================================
 
-    const {
-        error:debitError
-    } =
-    await supabaseClient
+const { error: debitError } =
+  await supabaseClient
     .from("transactions")
     .insert({
-
-        account_id:verifiedFromAccount.id,
-        transaction_type:"DEBIT",
-        amount:amount,
-        description:description,
-        reference_number:reference,
-        status:"SUCCESS"
-
+      account_id: verifiedFromAccount.id,
+      transaction_type: "DEBIT",
+      amount: amount,
+      description: description,
+      reference_number: debitReference,
+      status: "SUCCESS"
     });
 
+if (debitError) {
+  console.error("Debit transaction error:", debitError);
 
-    if(debitError){
+  alert(
+    "Debit transaction failed: " +
+    debitError.message
+  );
 
-        alert(
-            "Debit transaction failed: " +
-            debitError.message
-        );
-
-        return;
-    }
+  return;
+}
 
 
-    // CREDIT
+// =================================================
+// CREDIT TRANSACTION
+// =================================================
 
-    const {
-        error:creditError
-    } =
-    await supabaseClient
+const { error: creditError } =
+  await supabaseClient
     .from("transactions")
     .insert({
-
-        account_id:verifiedToAccount.id,
-        transaction_type:"CREDIT",
-        amount:amount,
-        description:description,
-        reference_number:reference,
-        status:"SUCCESS"
-
+      account_id: verifiedToAccount.id,
+      transaction_type: "CREDIT",
+      amount: amount,
+      description: description,
+      reference_number: creditReference,
+      status: "SUCCESS"
     });
 
+if (creditError) {
+  console.error("Credit transaction error:", creditError);
 
-    if(creditError){
+  alert(
+    "Credit transaction failed: " +
+    creditError.message
+  );
 
-        alert(
-            "Credit transaction failed: " +
-            creditError.message
-        );
-
-        return;
-    }
+  return;
+}
 
 
     alert(
