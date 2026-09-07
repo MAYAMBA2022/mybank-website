@@ -1010,46 +1010,94 @@ async function searchCustomer(){
 
 
 // =====================================================
-// COMMON ACCOUNT FIND
+// FIND ACCOUNT
 // =====================================================
 
 async function findAccount(accountNumber){
 
-    const {
-        data,
-        error
-    } =
-    await supabaseClient
-    .from("accounts")
-    .select(`
-        id,
-        account_number,
-        account_type,
-        balance,
-        customers(
-            customer_number,
-            full_name,
-            mobile,
-            address
-        )
-    `)
-    .eq(
-        "account_number",
-        accountNumber
-    )
-    .single();
+    const cleanAccountNumber =
+        String(accountNumber || "").trim();
 
-    if(error || !data){
+    if(!cleanAccountNumber){
+
         return {
-            account:null,
-            error:error || new Error("Account Not Found")
+            account: null,
+            error: new Error("Please enter Account Number")
         };
     }
 
-    return {
-        account:data,
-        error:null
-    };
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+        await supabaseClient
+        .from("accounts")
+        .select(`
+            id,
+            account_number,
+            account_type,
+            balance,
+            status,
+            customers(
+                customer_number,
+                full_name,
+                mobile,
+                address
+            )
+        `)
+        .eq(
+            "account_number",
+            cleanAccountNumber
+        )
+        .limit(1);
+
+
+        if(error){
+
+            console.error(
+                "Find Account Error:",
+                error
+            );
+
+            return {
+                account: null,
+                error: error
+            };
+        }
+
+
+        if(!data || data.length === 0){
+
+            return {
+                account: null,
+                error: new Error(
+                    "Account Not Found"
+                )
+            };
+        }
+
+
+        return {
+            account: data[0],
+            error: null
+        };
+
+    }
+    catch(error){
+
+        console.error(
+            "Find Account Exception:",
+            error
+        );
+
+        return {
+            account: null,
+            error: error
+        };
+    }
 }
 
 
