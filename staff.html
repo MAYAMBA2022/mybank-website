@@ -1009,23 +1009,30 @@ async function searchCustomer(){
 }
 
 // =====================================================
-// FIND ACCOUNT
+// COMMON ACCOUNT VERIFICATION
 // =====================================================
 
-async function findAccount(accountNumber) {
+async function getAccountDetails(accountNumber) {
 
-    if (!accountNumber) {
+    const cleanAccountNumber =
+        String(accountNumber || "").trim();
+
+    if (!cleanAccountNumber) {
         return {
             account: null,
-            error: new Error("Account Number is required")
+            error: "Account Number is required"
         };
     }
 
     try {
 
+        // -----------------------------------------
+        // GET ACCOUNT
+        // -----------------------------------------
+
         const {
-            data,
-            error
+            data: account,
+            error: accountError
         } = await supabaseClient
             .from("accounts")
             .select(`
@@ -1033,45 +1040,114 @@ async function findAccount(accountNumber) {
                 account_number,
                 account_type,
                 balance,
-                status,
-                customers(
+                customer_id
+            `)
+            .eq(
+                "account_number",
+                cleanAccountNumber
+            )
+            .maybeSingle();
+
+
+        if (accountError) {
+
+            console.error(
+                "Account Search Error:",
+                accountError
+            );
+
+            return {
+                account: null,
+                error: accountError.message
+            };
+        }
+
+
+        if (!account) {
+
+            return {
+                account: null,
+                error: "Account Not Found"
+            };
+        }
+
+
+        // -----------------------------------------
+        // GET CUSTOMER SEPARATELY
+        // -----------------------------------------
+
+        let customer = null;
+
+
+        if (account.customer_id) {
+
+            const {
+                data: customerData,
+                error: customerError
+            } = await supabaseClient
+                .from("customers")
+                .select(`
+                    id,
                     customer_number,
                     full_name,
                     mobile,
-                    address
+                    address,
+                    email,
+                    aadhaar_number,
+                    pan_number
+                `)
+                .eq(
+                    "id",
+                    account.customer_id
                 )
-            `)
-            .eq("account_number", accountNumber)
-            .maybeSingle();
+                .maybeSingle();
 
-        if (error) {
-            console.error("Find Account Error:", error);
 
-            return {
-                account: null,
-                error: error
-            };
+            if (customerError) {
+
+                console.error(
+                    "Customer Search Error:",
+                    customerError
+                );
+
+            } else {
+
+                customer = customerData;
+
+            }
         }
 
-        if (!data) {
-            return {
-                account: null,
-                error: new Error("Account Not Found")
-            };
-        }
+
+        // -----------------------------------------
+        // RETURN ACCOUNT + CUSTOMER
+        // -----------------------------------------
 
         return {
-            account: data,
+
+            account: {
+                id: account.id,
+                account_number: account.account_number,
+                account_type: account.account_type,
+                balance: account.balance,
+                customer_id: account.customer_id,
+                customers: customer
+            },
+
             error: null
+
         };
 
-    } catch (error) {
+    }
+    catch (error) {
 
-        console.error("Find Account Exception:", error);
+        console.error(
+            "Account Verification Exception:",
+            error
+        );
 
         return {
             account: null,
-            error: error
+            error: error.message || "Account verification failed"
         };
     }
 }
