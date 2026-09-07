@@ -1153,6 +1153,15 @@ let verifiedDepositAccount = null;
 
 async function verifyDepositAccount(){
 
+    console.log("VERIFY BUTTON CLICKED");
+
+    const accountNumber =
+        document.getElementById("depositAccount")
+        .value.trim();
+
+    console.log("ACCOUNT NUMBER:", accountNumber);
+
+
     const accountNumber =
         document.getElementById(
             "depositAccount"
