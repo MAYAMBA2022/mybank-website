@@ -1607,7 +1607,6 @@ function clearTransferVerification(){
     .style.display="none";
 }
 
-
 // =====================================================
 // TRANSFER
 // =====================================================
@@ -1666,7 +1665,7 @@ async function transferMoney(){
     }
 
 
-    if(!amount || amount<=0){
+    if(!amount || amount <= 0){
 
         alert("Please enter valid transfer amount.");
         return;
@@ -1675,9 +1674,6 @@ async function transferMoney(){
 
     const senderBalance =
     Number(verifiedFromAccount.balance || 0);
-
-    const receiverBalance =
-    Number(verifiedToAccount.balance || 0);
 
 
     if(senderBalance < amount){
@@ -1694,169 +1690,115 @@ async function transferMoney(){
     }
 
 
-    const newSenderBalance =
-    senderBalance - amount;
+    // =====================================================
+    // DATABASE TRANSFER
+    // Balance + DEBIT + CREDIT Transaction
+    // =====================================================
 
-    const newReceiverBalance =
-    receiverBalance + amount;
+    try {
 
-
-    // SENDER UPDATE
-
-    const {
-        error:senderUpdateError
-    } =
-    await supabaseClient
-    .from("accounts")
-    .update({
-        balance:newSenderBalance
-    })
-    .eq(
-        "id",
-        verifiedFromAccount.id
-    );
-
-
-    if(senderUpdateError){
-
-        alert(
-            "Sender balance update failed: " +
-            senderUpdateError.message
+        const {
+            data: transferData,
+            error: transferError
+        } =
+        await supabaseClient.rpc(
+            "staff_transfer",
+            {
+                p_from_account: fromNumber,
+                p_to_account: toNumber,
+                p_amount: amount,
+                p_description: description
+            }
         );
 
-        return;
-    }
+
+        if(transferError){
+
+            console.error(
+                "Transfer Error:",
+                transferError
+            );
+
+            alert(
+                "Transfer Failed!\n\n" +
+                transferError.message
+            );
+
+            return;
+        }
 
 
-    // RECEIVER UPDATE
+        if(!transferData){
 
-    const {
-        error:receiverUpdateError
-    } =
-    await supabaseClient
-    .from("accounts")
-    .update({
-        balance:newReceiverBalance
-    })
-    .eq(
-        "id",
-        verifiedToAccount.id
-    );
+            alert(
+                "Transfer Failed!\n\n" +
+                "No response received from server."
+            );
+
+            return;
+        }
 
 
-    if(receiverUpdateError){
+        // =====================================================
+        // SUCCESS MESSAGE
+        // =====================================================
 
         alert(
-            "Receiver balance update failed: " +
-            receiverUpdateError.message
+            "Transfer Successful!\n\n" +
+
+            "From Customer: " +
+            (verifiedFromAccount.customers?.full_name || "-") +
+
+            "\nFrom Account: " +
+            fromNumber +
+
+            "\n\nTo Customer: " +
+            (verifiedToAccount.customers?.full_name || "-") +
+
+            "\nTo Account: " +
+            toNumber +
+
+            "\n\nAmount: ₹" +
+            amount.toFixed(2) +
+
+            "\n\nTransfer completed successfully."
         );
 
-        return;
+
+        // =====================================================
+        // CLEAR FORM
+        // =====================================================
+
+        document.getElementById("fromAccount").value = "";
+        document.getElementById("toAccount").value = "";
+        document.getElementById("transferAmount").value = "";
+        document.getElementById("transferDescription").value = "";
+
+
+        clearTransferVerification();
+
+
+        // =====================================================
+        // REFRESH RECENT TRANSACTIONS
+        // =====================================================
+
+        loadTransactions();
+
+    }
+    catch(error){
+
+        console.error(
+            "Money Transfer Error:",
+            error
+        );
+
+        alert(
+            "Transfer Failed!\n\n" +
+            error.message
+        );
+
     }
 
-
-    // =================================================
-// UNIQUE TRANSFER REFERENCES
-// =================================================
-
-const baseReference =
-  "TRF-" +
-  crypto.randomUUID().replace(/-/g, "");
-
-const debitReference = baseReference + "-D";
-const creditReference = baseReference + "-C";
-
-
-// =================================================
-// DEBIT TRANSACTION
-// =================================================
-
-const { error: debitError } =
-  await supabaseClient
-    .from("transactions")
-    .insert({
-      account_id: verifiedFromAccount.id,
-      transaction_type: "DEBIT",
-      amount: amount,
-      description: description,
-      reference_number: debitReference,
-      status: "SUCCESS"
-    });
-
-if (debitError) {
-  console.error("Debit transaction error:", debitError);
-
-  alert(
-    "Debit transaction failed: " +
-    debitError.message
-  );
-
-  return;
-}
-
-
-// =================================================
-// CREDIT TRANSACTION
-// =================================================
-
-const { error: creditError } =
-  await supabaseClient
-    .from("transactions")
-    .insert({
-      account_id: verifiedToAccount.id,
-      transaction_type: "CREDIT",
-      amount: amount,
-      description: description,
-      reference_number: creditReference,
-      status: "SUCCESS"
-    });
-
-if (creditError) {
-  console.error("Credit transaction error:", creditError);
-
-  alert(
-    "Credit transaction failed: " +
-    creditError.message
-  );
-
-  return;
-}
-
-
-    alert(
-        "Transfer Successful!\n\n" +
-
-        "From Customer: " +
-        (verifiedFromAccount.customers?.full_name || "-") +
-
-        "\nFrom Account: " +
-        fromNumber +
-
-        "\n\nTo Customer: " +
-        (verifiedToAccount.customers?.full_name || "-") +
-
-        "\nTo Account: " +
-        toNumber +
-
-        "\n\nAmount: ₹" +
-        amount.toFixed(2) +
-
-        "\n\nSender New Balance: ₹" +
-        newSenderBalance.toFixed(2) +
-
-        "\nReference: " +
-        reference
-    );
-
-
-    document.getElementById("fromAccount").value="";
-    document.getElementById("toAccount").value="";
-    document.getElementById("transferAmount").value="";
-    document.getElementById("transferDescription").value="";
-
-    clearTransferVerification();
-
-    loadTransactions();
 }
 
 
