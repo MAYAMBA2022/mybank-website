@@ -1054,100 +1054,6 @@ async function findAccount(accountNumber){
 
 
 // =====================================================
-// DEPOSIT VERIFY
-// =====================================================
-
-let verifiedDepositAccount=null;
-
-async function verifyDepositAccount(){
-
-    const accountNumber =
-    document.getElementById("depositAccount")
-    .value.trim();
-
-    const box =
-    document.getElementById("depositVerifyBox");
-
-
-    verifiedDepositAccount=null;
-
-    box.style.display="block";
-
-
-    if(!accountNumber){
-
-        box.innerHTML="❌ Please enter Account Number.";
-        box.className="verify-box verify-error";
-        return;
-    }
-
-
-    const result =
-    await findAccount(accountNumber);
-
-
-    if(result.error){
-
-        box.innerHTML="❌ Account Not Found.";
-        box.className="verify-box verify-error";
-        return;
-    }
-
-
-    verifiedDepositAccount=result.account;
-
-    showAccountVerification(
-        box,
-        result.account,
-        "ACCOUNT VERIFIED"
-    );
-}
-
-
-function showAccountVerification(box,account,title){
-
-    box.innerHTML =
-
-    "✅ <strong>" + title + "</strong><br>" +
-
-    "Customer Name: <strong>" +
-    (account.customers?.full_name || "-") +
-    "</strong><br>" +
-
-    "Customer ID: <strong>" +
-    (account.customers?.customer_number || "-") +
-    "</strong><br>" +
-
-    "Account Number: <strong>" +
-    account.account_number +
-    "</strong><br>" +
-
-    "Account Type: <strong>" +
-    account.account_type +
-    "</strong><br>" +
-
-    "Current Balance: <strong>₹" +
-    Number(account.balance || 0).toFixed(2) +
-    "</strong>";
-
-    box.className="verify-box verify-success";
-}
-
-
-// =====================================================
-// DEPOSIT CLEAR
-// =====================================================
-
-function clearDepositVerification(){
-
-    verifiedDepositAccount=null;
-
-    document.getElementById("depositVerifyBox")
-    .style.display="none";
-}
-
-
-// =====================================================
 // DEPOSIT
 // =====================================================
 
@@ -1170,7 +1076,8 @@ async function depositMoney() {
         document.getElementById("depositDescription").value.trim()
         || "Cash Deposit";
 
-    // Account बदलला असल्यास पुन्हा Verify करणे आवश्यक
+
+    // Account changed after verification
     if (
         accountNumber !==
         verifiedDepositAccount.account_number
@@ -1179,53 +1086,77 @@ async function depositMoney() {
         return;
     }
 
+
     // Amount validation
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
         alert("Please enter valid amount.");
         return;
     }
 
+
     const depositBtn =
         document.getElementById("depositBtn");
 
-    depositBtn.disabled = true;
-    depositBtn.innerText = "Processing...";
+
+    if (depositBtn) {
+        depositBtn.disabled = true;
+        depositBtn.innerText = "Processing...";
+    }
+
 
     try {
 
-        // ============================================
-        // IMPORTANT:
-        // Balance + Transaction दोन्ही
-        // Supabase database function मधून होतील.
-        // ============================================
+        console.log("Cash Deposit Started");
 
-        const {
-            data,
-            error
-        } = await supabaseClient.rpc(
-            "staff_cash_deposit",
-            {
-                p_account_number: accountNumber,
-                p_amount: amount,
-                p_description: description
-            }
-        );
+        console.log("Account:", accountNumber);
+        console.log("Amount:", amount);
+        console.log("Description:", description);
 
+
+        // =================================================
+        // SUPABASE RPC
+        // =================================================
+
+        const { data, error } =
+            await supabaseClient.rpc(
+                "staff_cash_deposit",
+                {
+                    p_account_number: accountNumber,
+                    p_amount: amount,
+                    p_description: description
+                }
+            );
+
+
+        console.log("RPC DATA:", data);
+        console.log("RPC ERROR:", error);
+
+
+        // RPC error
         if (error) {
-            throw error;
-        }
 
-        if (!data || data.length === 0) {
             throw new Error(
-                "Deposit completed but updated balance was not returned."
+                error.message ||
+                "Cash deposit failed."
             );
         }
 
+
+        // No returned data
+        if (!data || data.length === 0) {
+
+            throw new Error(
+                "Deposit completed but no updated account was returned."
+            );
+        }
+
+
         const updatedAccount = data[0];
 
-        // ============================================
-        // SUCCESS MESSAGE
-        // ============================================
+
+        // =================================================
+        // SUCCESS
+        // =================================================
 
         alert(
             "Deposit Successful!\n\n" +
@@ -1239,7 +1170,7 @@ async function depositMoney() {
             "\nAccount: " +
             accountNumber +
 
-            "\nDeposit: ₹" +
+            "\nDeposit Amount: ₹" +
             amount.toFixed(2) +
 
             "\nNew Balance: ₹" +
@@ -1248,9 +1179,10 @@ async function depositMoney() {
             ).toFixed(2)
         );
 
-        // ============================================
+
+        // =================================================
         // CLEAR FORM
-        // ============================================
+        // =================================================
 
         document.getElementById(
             "depositAccount"
@@ -1264,10 +1196,15 @@ async function depositMoney() {
             "depositDescription"
         ).value = "";
 
+
         clearDepositVerification();
 
-        // Recent Transactions refresh
-        loadTransactions();
+
+        // Refresh transactions
+        if (typeof loadTransactions === "function") {
+            await loadTransactions();
+        }
+
 
     }
     catch (error) {
@@ -1277,6 +1214,7 @@ async function depositMoney() {
             error
         );
 
+
         alert(
             "Deposit Failed!\n\n" +
             error.message
@@ -1285,12 +1223,13 @@ async function depositMoney() {
     }
     finally {
 
-        depositBtn.disabled = false;
-        depositBtn.innerText = "Deposit Money";
+        if (depositBtn) {
+            depositBtn.disabled = false;
+            depositBtn.innerText = "Deposit Money";
+        }
 
     }
 }
-
 // =====================================================
 // WITHDRAW VERIFY
 // =====================================================
